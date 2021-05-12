@@ -1,0 +1,389 @@
+# Configuration changes to bring source (config-postSetup.gz) to target (config.ldif)
+# Comparison options:
+#   Ignore differences in configuration that is part of the topology registry
+#   Ignore differences on shared host
+#   Ignore differences by instance
+
+dsconfig set-trust-manager-provider-prop \
+    --provider-name 'Blind Trust'  \
+    --set enabled:true 
+
+dsconfig set-backend-prop \
+    --backend-name changelog  \
+    --set enabled:true  \
+    --set 'changelog-maximum-age:2 h' 
+
+dsconfig create-local-db-index \
+    --backend-name userRoot  \
+    --index-name accessGrantClientId  \
+    --set index-type:equality 
+
+dsconfig create-local-db-index \
+    --backend-name userRoot  \
+    --index-name accessGrantExpires  \
+    --set index-type:ordering 
+
+dsconfig create-local-db-index \
+    --backend-name userRoot  \
+    --index-name accessGrantGuid  \
+    --set index-type:equality 
+
+dsconfig create-local-db-index \
+    --backend-name userRoot  \
+    --index-name accessGrantHashedRefreshTokenValue  \
+    --set index-type:equality 
+
+dsconfig create-local-db-index \
+    --backend-name userRoot  \
+    --index-name accessGrantUniqueUserIdentifier  \
+    --set index-type:equality 
+
+dsconfig create-local-db-index \
+    --backend-name userRoot  \
+    --index-name pf-connected-identity  \
+    --set index-type:equality 
+
+dsconfig create-local-db-index \
+    --backend-name userRoot  \
+    --index-name pf-oauth-client-id  \
+    --set index-type:equality  \
+    --set index-type:ordering  \
+    --set index-type:substring 
+
+dsconfig create-local-db-index \
+    --backend-name userRoot  \
+    --index-name pf-oauth-client-last-modified  \
+    --set index-type:ordering 
+
+dsconfig create-local-db-index \
+    --backend-name userRoot  \
+    --index-name pf-oauth-client-name  \
+    --set index-type:equality  \
+    --set index-type:ordering  \
+    --set index-type:substring 
+
+dsconfig create-external-server \
+    --server-name pingfederate  \
+    --type http  \
+    --set base-url:https://${PF_ENGINE_PRIVATE_HOSTNAME}:${PF_ENGINE_PRIVATE_PORT_HTTPS}  \
+    --set hostname-verification-method:allow-all  \
+    --set 'trust-manager-provider:Blind Trust' 
+
+dsconfig set-access-control-handler-prop \
+    --add 'global-aci:(extop="1.3.6.1.4.1.30221.2.6.17 || 1.3.6.1.4.1.30221.2.6.62")(version 3.0;acl "Authenticated access to the multi-update and generate-password extended requests for the Delegated Admin API"; allow (read) userdn="ldap:///all";)'  \
+    --add 'global-aci:(target="ldap:///cn=alerts")(targetattr="*||+")(version 3.0; acl "pingdatagovernance access to the alerts backend"; allow(read,search,compare) userdn="ldap:///cn=pingdatagovernance,cn=Root DNs,cn=config";)'  \
+    --add 'global-aci:(target="ldap:///cn=monitor")(targetattr="*||+")(version 3.0; acl "pingdatagovernance access to the monitor backend"; allow(read,search,compare) userdn="ldap:///cn=Govepingdatagovernance,cn=Root DNs,cn=config";)'  \
+    --add 'global-aci:(target="ldap:///ou=people,dc=example,dc=com")(targetattr="*||+")(version 3.0; acl "pingdatagovernance access to user store data"; allow(all) userdn="ldap:///cn=pingdatagovernance,cn=Root DNs,cn=config";)'  \
+    --add 'global-aci:(targetattr="uid||entryUUID||isMemberOf")(version 3.0; acl "pingdatagovernance access to selected attributes"; allow(all) userdn="ldap:///cn=pingdatagovernance,cn=Root DNs,cn=config";)'  \
+    --add 'global-aci:(targetcontrol="1.2.840.113556.1.4.1413||1.3.6.1.1.13.2||1.3.6.1.4.1.30221.2.5.2||1.3.6.1.4.1.30221.2.5.40||1.3.6.1.4.1.30221.2.5.44||1.3.6.1.1.12||2.16.840.1.113730.3.4.3")(version 3.0; acl "pingdatagovernance access to selected controls"; allow (read) userdn="ldap:///cn=pingdatagovernance,cn=Root DNs,cn=config";)'  \
+    --add 'global-aci:(targetcontrol="1.2.840.113556.1.4.319")(version 3.0; acl "Allow paging for pingfederate"; allow (read) userdn="ldap:///cn=pingfederate,cn=Root DNs,cn=config";)'  \
+    --add 'global-aci:(targetcontrol="1.2.840.113556.1.4.473")(version 3.0; acl "Allow Server Sort for pingfederate"; allow (read) userdn="ldap:///cn=pingfederate,cn=Root DNs,cn=config";)'  \
+    --add 'global-aci:(targetcontrol="1.3.6.1.4.1.4203.1.10.2 || 1.3.6.1.4.1.30221.2.5.40")(version 3.0;acl "Authenticated access to the no-op and password validation details request controls for the Delegated Admin API"; allow (read) userdn="ldap:///all";)' 
+
+dsconfig set-backend-prop \
+    --backend-name userRoot  \
+    --set compact-common-parent-dn:ou=people,dc=example,dc=com 
+
+dsconfig create-consent-definition \
+    --definition-name email  \
+    --set 'display-name:Email Address'  \
+    --set 'description:Share your email address' 
+
+dsconfig create-consent-definition-localization \
+    --definition-name email  \
+    --localization-name en-US  \
+    --set version:1.0  \
+    --set 'title-text:Share your email address'  \
+    --set 'data-text:Your email address'  \
+    --set 'purpose-text:Join Mailing List' 
+
+dsconfig create-delegated-admin-rights \
+    --rights-name deladmin  \
+    --set enabled:true  \
+    --set admin-user-dn:uid=administrator,ou=people,dc=example,dc=com 
+
+dsconfig create-rest-resource-type \
+    --type-name groups  \
+    --type group  \
+    --set enabled:true  \
+    --set resource-endpoint:groups  \
+    --set structural-ldap-objectclass:groupOfUniqueNames  \
+    --set search-base-dn:ou=groups,dc=example,dc=com  \
+    --set parent-dn:ou=groups,dc=example,dc=com  \
+    --set display-name:Groups  \
+    --set search-filter-pattern:(cn=*%%*)  \
+    --set primary-display-attribute-type:cn 
+
+dsconfig create-delegated-admin-resource-rights \
+    --rights-name deladmin  \
+    --rest-resource-type groups  \
+    --set enabled:true  \
+    --set admin-permission:create  \
+    --set admin-permission:delete  \
+    --set admin-permission:manage-group-membership  \
+    --set admin-permission:read  \
+    --set admin-permission:update  \
+    --set admin-scope:all-resources-in-base 
+
+dsconfig create-delegated-admin-attribute \
+    --type-name groups  \
+    --attribute-type cn  \
+    --set display-name:Group 
+
+dsconfig create-delegated-admin-attribute \
+    --type-name groups  \
+    --attribute-type description  \
+    --set display-name:Description 
+
+dsconfig create-rest-resource-type \
+    --type-name users  \
+    --type user  \
+    --set enabled:true  \
+    --set resource-endpoint:users  \
+    --set structural-ldap-objectclass:inetOrgPerson  \
+    --set search-base-dn:ou=people,dc=example,dc=com  \
+    --set parent-dn:ou=people,dc=example,dc=com  \
+    --set display-name:Users  \
+    --set search-filter-pattern:(|(cn=*%%*)(mail=%%*)(uid=%%*)(sn=*%%*))  \
+    --set primary-display-attribute-type:cn 
+
+dsconfig create-delegated-admin-resource-rights \
+    --rights-name deladmin  \
+    --rest-resource-type users  \
+    --set enabled:true  \
+    --set admin-permission:create  \
+    --set admin-permission:delete  \
+    --set admin-permission:manage-group-membership  \
+    --set admin-permission:read  \
+    --set admin-permission:update  \
+    --set admin-scope:all-resources-in-base 
+
+dsconfig create-delegated-admin-attribute \
+    --type-name users  \
+    --attribute-type cn  \
+    --set 'display-name:Full Name' 
+
+dsconfig create-delegated-admin-attribute \
+    --type-name users  \
+    --attribute-type ds-pwp-account-disabled  \
+    --set 'display-name:Account Disabled' 
+
+dsconfig create-delegated-admin-attribute \
+    --type-name users  \
+    --attribute-type givenName  \
+    --set 'display-name:First Name'  \
+    --set display-order-index:1 
+
+dsconfig create-delegated-admin-attribute \
+    --type-name users  \
+    --attribute-type mail  \
+    --set display-name:Email  \
+    --set display-order-index:3 
+
+dsconfig create-delegated-admin-attribute \
+    --type-name users  \
+    --attribute-type sn  \
+    --set 'display-name:Last Name'  \
+    --set display-order-index:2 
+
+dsconfig create-delegated-admin-attribute \
+    --type-name users  \
+    --attribute-type uid  \
+    --set 'display-name:User ID'  \
+    --set display-order-index:4 
+
+dsconfig set-connection-handler-prop \
+    --handler-name 'HTTPS Connection Handler'  \
+    --remove http-servlet-extension:Documentation  \
+    --remove 'http-servlet-extension:Swagger UI'  \
+    --add 'http-servlet-extension:Delegated Admin'  \
+    --reset web-application-extension 
+
+dsconfig set-gauge-prop \
+    --gauge-name 'Available File Descriptors'  \
+    --set enabled:false 
+
+dsconfig set-gauge-prop \
+    --gauge-name 'CPU Usage (Percent)'  \
+    --set enabled:false 
+
+dsconfig set-gauge-prop \
+    --gauge-name 'License Expiration (Days)'  \
+    --set enabled:false  \
+    --set warning-value:10.0 
+
+dsconfig create-http-servlet-cross-origin-policy \
+    --policy-name 'Delegated Admin Cross-Origin Policy'  \
+    --set 'cors-allowed-methods: DELETE'  \
+    --set 'cors-allowed-methods: GET'  \
+    --set 'cors-allowed-methods: OPTIONS'  \
+    --set 'cors-allowed-methods: PATCH'  \
+    --set 'cors-allowed-methods: POST'  \
+    --set 'cors-allowed-origins: *' 
+
+dsconfig set-http-servlet-extension-prop \
+    --extension-name 'Delegated Admin'  \
+    --set 'cross-origin-policy:Delegated Admin Cross-Origin Policy'  \
+    --set access-token-scope:urn:pingidentity:directory-delegated-admin 
+
+dsconfig set-http-servlet-extension-prop \
+    --extension-name 'Directory REST API'  \
+    --set access-token-scope:ds 
+
+dsconfig set-log-publisher-prop \
+    --publisher-name 'Data Recovery Log'  \
+    --set enabled:false 
+
+dsconfig set-log-publisher-prop \
+    --publisher-name 'File-Based Debug Logger'  \
+    --set enabled:true 
+
+dsconfig create-debug-target \
+    --publisher-name 'File-Based Debug Logger'  \
+    --target-name com.unboundid.guitools.replicationcli  \
+    --set debug-level:verbose 
+
+dsconfig create-debug-target \
+    --publisher-name 'File-Based Debug Logger'  \
+    --target-name foo.bar  \
+    --set debug-level:verbose 
+
+dsconfig set-monitor-provider-prop \
+    --provider-name 'Host System'  \
+    --reset enabled 
+
+dsconfig create-monitoring-endpoint \
+    --endpoint-name StatsDExporterEndpoint  \
+    --type statsd  \
+    --set enabled:true  \
+    --set hostname:localhost 
+
+dsconfig set-recurring-task-prop \
+    --task-name 'Export All Non-Administrative Backends'  \
+    --set 'description:Exports the contents of all non-administrative backends to LDIF.  The LDIF exports will be gzip-compressed, and they will be encrypted if the global configuration is set to encrypt LDIF exports by default.  The export will be rate-limited to ten megabytes per second of compressed data to help avoid any noticeable impact on server performance.  The exports will be written into the "/opt/backup" directory of the container and will be kept for seven days.'  \
+    --set ldif-directory:/opt/backup  \
+    --set encrypt:true 
+
+dsconfig create-root-dn-user \
+    --user-name pingdatagovernance  \
+    --set alternate-bind-dn:cn=datagov  \
+    --set alternate-bind-dn:cn=pingdatagovernance  \
+    --set password:{PBKDF2}AAhk4fSGycMKpxAA4zfmJX3W75WnAWfghp1agNC8HJpO2JRlT5+Gn/RxEaM=  \
+    --set inherit-default-root-privileges:false  \
+    --set privilege:password-reset  \
+    --set privilege:proxied-auth  \
+    --set privilege:unindexed-search  \
+    --set search-result-entry-limit:100000 
+
+dsconfig create-root-dn-user \
+    --user-name pingdatasync  \
+    --set alternate-bind-dn:cn=datasync  \
+    --set alternate-bind-dn:cn=sync  \
+    --set password:{PBKDF2}AAh1pdeeCZNSBBAAQ9ReA47zNd6WjN0CQZSsBjTxheFCrtZ9pAnMev/RRqA=  \
+    --set inherit-default-root-privileges:false  \
+    --set privilege:bypass-acl  \
+    --set privilege:bypass-pw-policy  \
+    --set privilege:config-read  \
+    --set privilege:password-reset  \
+    --set privilege:unindexed-search 
+
+dsconfig create-root-dn-user \
+    --user-name pingdirectoryproxy  \
+    --set alternate-bind-dn:cn=pingdirectoryproxy  \
+    --set alternate-bind-dn:cn=proxy  \
+    --set password:{PBKDF2}AAjPlEQyC5vTaRAAuKvX7UF7xx/v/qomqA8ip3mMX3B2XRD/fO5k7HWugds=  \
+    --set privilege:proxied-auth 
+
+dsconfig create-root-dn-user \
+    --user-name pingfederate  \
+    --set alternate-bind-dn:cn=fed  \
+    --set alternate-bind-dn:cn=pf  \
+    --set alternate-bind-dn:cn=pingfederate  \
+    --set password:{PBKDF2}AAhOg4POFdpbABAAWzdhjd2PdzafRJ908ZeT22wJcc1WqDlYtJTUwLchfOU=  \
+    --set inherit-default-root-privileges:false  \
+    --set privilege:config-read  \
+    --set privilege:password-reset  \
+    --set privilege:permit-get-password-policy-state-issues  \
+    --set privilege:proxied-auth  \
+    --set privilege:unindexed-search  \
+    --set is-proxyable:prohibited 
+
+dsconfig set-virtual-attribute-prop \
+    --name 'Delegated Admin Privilege'  \
+    --set enabled:true 
+
+dsconfig create-identity-mapper \
+    --mapper-name entryUUIDMatch  \
+    --type exact-match  \
+    --set enabled:true  \
+    --set match-attribute:entryUUID  \
+    --set match-base-dn:dc=example,dc=com 
+
+dsconfig create-access-token-validator \
+    --validator-name pingfederate-validator  \
+    --type ping-federate  \
+    --set identity-mapper:entryUUIDMatch  \
+    --set subject-claim-name:Username  \
+    --set enabled:true  \
+    --set authorization-server:pingfederate  \
+    --set client-id:pingdirectory  \
+    --set client-secret:AABRNH08tbjqUaYLmPwMaD+IUxs3lwWwkSo= 
+
+dsconfig create-identity-mapper \
+    --mapper-name user-id-identity-mapper  \
+    --type exact-match  \
+    --set enabled:true  \
+    --set match-attribute:cn  \
+    --set match-attribute:entryUUID  \
+    --set match-attribute:uid  \
+    --set match-base-dn:cn=config  \
+    --set match-base-dn:ou=people,dc=example,dc=com 
+
+dsconfig create-access-token-validator \
+    --validator-name mock-access-token-validator  \
+    --type mock  \
+    --set identity-mapper:user-id-identity-mapper  \
+    --set enabled:true  \
+    --set evaluation-order-index:1 
+
+dsconfig set-consent-service-prop \
+    --set enabled:true  \
+    --set base-dn:ou=Consents,dc=example,dc=com  \
+    --set 'bind-dn:cn=consent service account'  \
+    --set consent-record-identity-mapper:user-id-identity-mapper  \
+    --set 'service-account-dn:uid=Consent Admin,ou=people,dc=example,dc=com'  \
+    --set unprivileged-consent-scope:consent  \
+    --set privileged-consent-scope:consent_admin 
+
+dsconfig set-http-servlet-extension-prop \
+    --extension-name Consent  \
+    --set identity-mapper:user-id-identity-mapper 
+
+dsconfig create-plugin \
+    --plugin-name ExpiredSessionAutoPurge  \
+    --type purge-expired-data  \
+    --set enabled:true  \
+    --set datetime-attribute:pf-authn-session-group-expiry-time  \
+    --set 'expiration-offset:1 h'  \
+    --set purge-behavior:subtree-delete-entries  \
+    --set base-dn:ou=sessions,dc=example,dc=com  \
+    --set filter:(objectClass=pf-authn-session-groups)  \
+    --set 'polling-interval:20 m' 
+
+dsconfig create-plugin \
+    --plugin-name IdleSessionAutoPurge  \
+    --type purge-expired-data  \
+    --set enabled:true  \
+    --set datetime-attribute:pf-authn-session-group-last-activity-time  \
+    --set 'expiration-offset:1 w'  \
+    --set purge-behavior:subtree-delete-entries  \
+    --set base-dn:ou=sessions,dc=example,dc=com  \
+    --set filter:(objectClass=pf-authn-session-groups)  \
+    --set 'polling-interval:1 d' 
+
+dsconfig set-plugin-prop \
+    --plugin-name 'Stats Collector'  \
+    --set enabled:true  \
+    --set server-info:extended 
+
+

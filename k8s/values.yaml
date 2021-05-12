@@ -1,0 +1,353 @@
+############################################################
+# Ping Identity DevOps values.yaml
+############################################################
+# The yaml is seperated into 2 major sections:
+#  - global - Represents the base set of values that will
+#             be used for each product, if that product
+#             doesn't override the global values.
+#
+#  - image  - For every image/product, the values will
+#             be merged with the global settings, and
+#             take precedence.
+############################################################
+
+############################################################
+# Global values
+############################################################
+global:
+  addReleaseNameToResource: prepend
+  ingress:
+    enabled: true
+    addReleaseNameToHost: prepend
+    defaultDomain: ping-devops.com
+    defaultTlsSecret:
+    annotations:
+      # nginx example
+      nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+      kubernetes.io/ingress.class: "nginx-public"
+  image:
+    repository: pingidentity
+    name:
+    tag: 2104
+    pullPolicy: IfNotPresent
+  license:
+    secret:
+      devOps: devops-secret
+
+  #   secrets:
+  #     {secret-name}:
+  #       {secret-key | to-json}:
+  #         path: /opt/in/some/location/secrets
+  #         file: devops-secret.env
+  vault:
+    enabled: true
+    hashicorp:
+      # serviceAccountName: vault-auth
+      annotations:
+        agent-inject: true
+        agent-init-first: true
+        agent-pre-populate-only: true
+        log-level: info
+        preserve-secret-case: true
+        role: ping-devops-gte-default
+        secret-volume-path: /run/secrets
+        serviceAccountName: vault-auth
+      secretPrefix: secret/samirgandhi@pingidentity.com/${K8S_NAMESPACE}/
+      secrets:
+        devops-secret.env:
+          to-json:
+            file: devops-secret.env
+  envs:
+    PING_IDENTITY_ACCEPT_EULA: "YES"
+    # need this because it's part of config, but not
+    # PD_DELEGATOR_HTTPS_PUBLIC_PORT: "443"
+    
+#############################################################
+# pingfederate-admin values
+#############################################################
+pingfederate-admin:
+  vault:
+    enabled: true
+    hashicorp:
+      # serviceAccountName: vault-auth
+      annotations:
+        agent-inject: true
+        agent-init-first: true
+        agent-pre-populate-only: true
+        log-level: info
+        preserve-secret-case: true
+        role: ping-devops-gte-default
+        secret-volume-path: /run/secrets
+        serviceAccountName: vault-auth
+      secretPrefix: secret/samirgandhi@pingidentity.com/${K8S_NAMESPACE}/
+      secrets:
+        devops-secret.env:
+          to-json:
+            file: devops-secret.env
+        pf-keys.env:
+          to-json:
+            file: devops-secret.env
+  enabled: true
+  # container:
+  #   waitFor:
+  #     pingdirectory:
+  #       service: ldaps
+  image:
+    repository: pingidentity
+    name: pingfederate
+    # tag: 10.2.0-edge
+    pullPolicy: Always
+  secretVolumes:
+    pf-master-key:
+      items:
+        pf.jwk: /opt/in/instance/server/default/data/pf.jwk
+  envs:
+    PF_CONSOLE_AUTHENTICATION: OIDC
+    PF_ADMIN_API_AUTHENTICATION: NATIVE
+    SERVER_PROFILE_BASE_PATH: profiles/pingfederate
+    SERVER_PROFILE_BASE_URL: https://github.com/pingdevopsprogram/reference-cicd
+    SERVER_PROFILE_PARENT: BASE
+    SERVER_PROFILE_PATH: profiles/pingfederate_admin
+    SERVER_PROFILE_URL: https://github.com/pingdevopsprogram/reference-cicd
+    PF_ADMIN_PORT: "443"
+    PF_LOG_LEVEL: "DEBUG"
+    # data.json.subst specific vars. 
+    PA_ENGINE_PRIVATE_PORT_HTTPS: "3000"
+    PD_DELEGATOR_HTTPS_PUBLIC_PORT: "443"
+    # will change per branch (should be a variable? should come from vault?)
+    # PF_OIDC_CLIENT_ID: ""
+    # PF_OIDC_CLIENT_SECRET: ""
+    # will change per account
+    PF_OIDC_CLIENT_AUTHN_METHOD: client_secret_basic
+    PF_OIDC_AUTHORIZATION_ENDPOINT: "https://auth.pingone.com/${P1_ADMIN_ENV_ID}/as/authorize"
+    PF_OIDC_TOKEN_ENDPOINT: "https://auth.pingone.com/${P1_ADMIN_ENV_ID}/as/token"
+    PF_OIDC_USER_INFO_ENDPOINT: "https://auth.pingone.com/${P1_ADMIN_ENV_ID}/as/userinfo"
+    PF_OIDC_END_SESSION_ENDPOINT: "https://auth.pingone.com/${P1_ADMIN_ENV_ID}/as/signoff"
+    PF_OIDC_ISSUER: https://auth.pingone.com/${P1_ADMIN_ENV_ID}/as
+    PF_OIDC_ACR_VALUES: ""
+    PF_OIDC_SCOPES: openid email profile
+    PF_OIDC_USERNAME_ATTRIBUTE_NAME: name
+    PF_OIDC_ROLE_ATTRIBUTE_NAME: pf_admin_roles
+    PF_OIDC_ROLE_ADMIN: fullAdmin
+    PF_OIDC_ROLE_CRYPTOMANAGER: fullAdmin
+    PF_OIDC_ROLE_USERADMIN: fullAdmin
+    PF_OIDC_ROLE_EXPRESSIONADMIN: fullAdmin
+    # don't have auditor and admin
+    PF_OIDC_ROLE_AUDITOR: roleAuditor
+  workload:
+    securityContext:
+      fsGroup: 0
+      runAsUser: 0
+      runAsGroup: 0
+  services:
+    https:
+      servicePort: 443
+      containerPort: 443
+      ingressPort: 443
+      dataService: true
+  probes:
+    liveness:
+      command: /opt/liveness.sh
+      initialDelaySeconds: 90
+      periodSeconds: 10
+      timeoutSeconds: 5
+      successThreshold: 1
+      failureThreshold: 2
+    readiness:
+      command: /opt/liveness.sh
+      initialDelaySeconds: 30
+      periodSeconds: 5
+      timeoutSeconds: 5
+      successThreshold: 1
+      failureThreshold: 4
+
+#############################################################
+# pingfederate-engine values
+#############################################################
+pingfederate-engine:
+  enabled: true
+  image:
+    repository: pingidentity
+    name: pingfederate
+    # tag: 10.2.0-edge
+    pullPolicy: Always
+  secretVolumes:
+    pf-master-key:
+      items:
+        pf.jwk: /opt/in/instance/server/default/data/pf.jwk
+  envs:
+    PF_CONSOLE_AUTHENTICATION: OIDC
+    PF_ADMIN_API_AUTHENTICATION: NATIVE
+    SERVER_PROFILE_PATH: profiles/pingfederate
+    SERVER_PROFILE_URL: https://github.com/pingdevopsprogram/reference-cicd
+    PF_LOG_LEVEL: DEBUG
+    PF_ADMIN_PORT: "443"
+    # will change per branch
+    # PF_OIDC_CLIENT_ID: ""
+    # PF_OIDC_CLIENT_SECRET: ""
+    # will change per account
+    PF_OIDC_CLIENT_AUTHN_METHOD: client_secret_basic
+    PF_OIDC_AUTHORIZATION_ENDPOINT: "https://auth.pingone.com/${P1_ADMIN_ENV_ID}/as/authorize"
+    PF_OIDC_TOKEN_ENDPOINT: "https://auth.pingone.com/${P1_ADMIN_ENV_ID}/as/token"
+    PF_OIDC_USER_INFO_ENDPOINT: "https://auth.pingone.com/${P1_ADMIN_ENV_ID}/as/userinfo"
+    PF_OIDC_END_SESSION_ENDPOINT: "https://auth.pingone.com/${P1_ADMIN_ENV_ID}/as/signoff"
+    PF_OIDC_ISSUER: https://auth.pingone.com/${P1_ADMIN_ENV_ID}/as
+    PF_OIDC_ACR_VALUES: ""
+    PF_OIDC_SCOPES: openid email profile
+    PF_OIDC_USERNAME_ATTRIBUTE_NAME: name
+    PF_OIDC_ROLE_ATTRIBUTE_NAME: pf_admin_roles
+    PF_OIDC_ROLE_ADMIN: fullAdmin
+    PF_OIDC_ROLE_CRYPTOMANAGER: fullAdmin
+    PF_OIDC_ROLE_USERADMIN: fullAdmin
+    PF_OIDC_ROLE_EXPRESSIONADMIN: fullAdmin
+    PF_OIDC_ROLE_AUDITOR: roleAuditor
+  workload:
+    type: Deployment
+    annotations:
+      telegraf.influxdata.com/inputs: |+
+        [[inputs.http]]
+          urls = ["https://localhost:9031/pf/heartbeat.ping"]
+          name_override = "pingfederate_heartbeat"
+          data_format = "json"
+          insecure_skip_verify = true
+      telegraf.influxdata.com/class: prometheus
+          ## IF older PF image
+          # json_query = "items"
+      prometheus.io/scrape: "true"
+      prometheus.io/path: /metrics
+      prometheus.io/port: "9273"
+  clustering:
+    autoscaling:
+      enabled: false
+  #     minReplicas: 3
+  #     maxReplicas: 6
+  #     targetCPUUtilizationPercentage: 75
+  container:
+    replicaCount: 3
+  probes:
+    liveness:
+      command: /opt/liveness.sh
+      initialDelaySeconds: 90
+      periodSeconds: 10
+      timeoutSeconds: 5
+      successThreshold: 1
+      failureThreshold: 2
+    readiness:
+      command: /opt/liveness.sh
+      initialDelaySeconds: 30
+      periodSeconds: 5
+      timeoutSeconds: 5
+      successThreshold: 1
+      failureThreshold: 4
+
+#############################################################
+# pingdirectory values
+#############################################################
+pingdirectory:
+  enabled: true
+  envs:
+    SERVER_PROFILE_PATH: profiles/pingdirectory
+    SERVER_PROFILE_URL: https://github.com/pingdevopsprogram/reference-cicd 
+    MAKELDIF_USERS: "2000"
+  container:
+    replicaCount: 3
+  workload:
+    annotations:
+      # telegraf.influxdata.com/ports: "8080,9090"
+      telegraf.influxdata.com/inputs: |+
+        [[inputs.http]]
+          urls = ["https://localhost:1443/directory/v1/cn=LDAP%20Result%20Codes,cn=monitor"]
+          name_override = "pingdirectory_monitor"
+          data_format = "json"
+          insecure_skip_verify = true
+          # Optional HTTP Basic Auth Credentials
+          username = "cn=administrator"
+          password = "2FederateM0re"
+        [[inputs.statsd]]
+          protocol = "udp"
+          service_address = ":8125"
+          # ## Percentiles to calculate for timing & histogram stats.
+          # percentiles = [50.0, 90.0, 99.0, 99.9, 99.95, 100.0]
+
+          metric_separator = "_"
+
+          ## Statsd data translation templates, more info can be read here:
+          ## https://github.com/influxdata/telegraf/blob/master/docs/TEMPLATE_PATTERN.md
+          templates = [
+              "*.*.throughput *.operation.measurement*",
+              "*.*.response-time *.operation.measurement*",
+              "*.backend-entry-count backendID.measurement*",
+              "*.backend-db-cache-percent-full backendID.measurement*",
+              "*.backend-size-on-disk backendID.measurement*",
+              "*.backend-active-cleaner-threads backendID.measurement*",
+              "*.backend-cleaner-backlog backendID.measurement*",
+              "*.backend-nodes-evicted backendID.measurement*",
+              "*.backend-checkpoints backendID.measurement*",
+              "*.backend-avg-checkpoint-duration backendID.measurement*",
+              "*.backend-time-since-last-checkpoint backendID.measurement*",
+              "*.backend-new-db-logs backendID.measurement*",
+              "*.backend-random-reads backendID.measurement*",
+              "*.backend-random-writes backendID.measurement*",
+              "*.backend-sequential-reads backendID.measurement*",
+              "*.backend-sequential-writes backendID.measurement*",
+              "*.entry-cache-hit-ratio entryCache.measurement*",
+              "*.entry-cache-hit-count entryCache.measurement*",
+              "*.entry-cache-attempts entryCache.measurement*",
+              "*.entry-cache-add-or-update entryCache.measurement*",
+              "*.entry-cache-size entryCache.measurement*",
+              "*.entry-cache-pct-full entryCache.measurement*",
+              "*.*.*.garbage-collections gcType.size.cause.measurement*",
+              "*.*.*.garbage-collection-duration gcType.size.cause.measurement*",
+              "*.garbage-collection-live-mbytes region.measurement*",
+              "changelog.* backendID.measurement*",
+              "*.*.*.*.ldap-conn-handler-bytes-read *.*.*.port.measurement*",
+              "*.*.*.*.ldap-conn-handler-bytes-written *.*.*.port.measurement*",
+              "*.*.*.*.ldap-conn-handler-messages-read *.*.*.port.measurement*",
+              "*.*.*.*.ldap-conn-handler-messages-written *.*.*.port.measurement*",
+              "*.*.*.*.ldap-conn-handler-search-requests *.*.*.port.measurement*",
+              "*.*.*.*.ldap-conn-handler-search-entries-returned *.*.*.port.measurement*"
+          ]
+      telegraf.influxdata.com/class: prometheus
+      prometheus.io/scrape: "true"
+      prometheus.io/path: /metrics
+      prometheus.io/port: "9273"
+  services:
+    ldap:
+      servicePort: 1389
+      containerPort: 1389
+      dataService: true
+    ldaps:
+      servicePort: 1636
+      containerPort: 1636
+      dataService: true
+      clusterService: true
+    https:
+      servicePort: 1443
+      containerPort: 1443
+      ingressPort: 443
+      dataService: true
+
+#############################################################
+# pingdataconsole values
+#############################################################
+pingdataconsole:
+  enabled: true
+  envs:
+    SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
+    SERVER_PROFILE_PATH: baseline/pingdataconsole
+    SERVER_PROFILE_BRANCH: master
+  workload:
+    # annotations:
+    #   # telegraf.influxdata.com/ports: "8080,9090"
+    #   telegraf.influxdata.com/inputs: |+
+    #     [[inputs.http]]
+    #       urls = ["https://upgrade-helm-pingdirectory:1443/directory/v1/cn=LDAP%20Result%20Codes,cn=monitor"]
+    #       name_override = "pingdirectory_monitor"
+    #       data_format = "json"
+    #       insecure_skip_verify = true
+    #       username = "cn=administrator"
+    #       password = "2FederateM0re"
+    #   telegraf.influxdata.com/class: prometheus
+    #   prometheus.io/scrape: "true"
+    #   prometheus.io/path: /metrics
+    #   prometheus.io/port: "9273"

@@ -1,0 +1,68 @@
+on:
+  # Trigger the workflow on push or pull request,
+  # but only for the main branch
+  delete:
+    branches-ignore:
+      - prod
+      - main
+      - master
+
+name: Clean Feature Env
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-2
+    - name: Install Dependencies
+      run: |
+        set -x
+        curl -o aws-iam-authenticator https://amazon-eks.s3.us-west-2.amazonaws.com/1.18.8/2020-09-18/bin/linux/amd64/aws-iam-authenticator
+        chmod +x ./aws-iam-authenticator
+        mkdir -p $HOME/bin && sudo cp ./aws-iam-authenticator /usr/local/bin/aws-iam-authenticator
+        curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl"
+        chmod +x ./kubectl
+        sudo mv ./kubectl /usr/local/bin/kubectl
+        mkdir ${HOME}/.kube
+        echo "${{ secrets.KUBE_CONFIG_YAML }}" | base64 --decode > ${HOME}/.kube/config
+        kubectl version
+        kubectl get pods
+        curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
+        chmod 700 get_helm.sh
+        ./get_helm.sh
+        helm repo add pingidentity https://helm.pingidentity.com/
+        helm repo update
+        helm repo ls
+        helm ls
+        env
+        echo "ended install"
+      # eval sha of profile dirs and deploy chart
+    - name: Cleanup Feature K8S Env
+      run: |
+        export REF=$(echo "${{ github.event.ref }}" | sed -e "s#refs/heads/##g")
+        sh ci_tools/clean_env.sh
+    - name: Cleanup Feature MyPing Env
+      run: |
+        export REF=$(echo "${{ github.event.ref }}" | sed -e "s#refs/heads/##g")
+        sh ci_tools/run_postman.sh k8s/deletemyping.yaml
+      env:
+        ## These environment variables will be obfuscated in workflow logs.
+        ## must use standard shell format
+        P1_ADMIN_ENV_ID: ${{ secrets.P1_ADMIN_ENV_ID}}
+        P1_ADMIN_ORG_ID: ${{ secrets.P1_ADMIN_ORG_ID}}
+        P1_ADMIN_ENV_ROLE_ID: ${{ secrets.P1_ADMIN_ENV_ROLE_ID}}
+        PF_ADMIN_WORKER_ID: ${{ secrets.PF_ADMIN_WORKER_ID}}
+        PF_ADMIN_WORKER_SECRET: ${{ secrets.PF_ADMIN_WORKER_SECRET}}
+        SLACK_WEBHOOK_ID: ${{ secrets.SLACK_WEBHOOK_ID }}
