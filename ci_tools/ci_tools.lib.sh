@@ -5,10 +5,10 @@ set -a
 # shellcheck source=@localSecrets
 test -f ./ci_tools/@localSecrets && . ./ci_tools/@localSecrets
 
-CHART_VERSION="0.5.7"
-DEV_NAMESPACE=${K8S_NAMESPACE:-sg-dev}
-QA_NAMESPACE=${K8S_NAMESPACE:-sg-qa}
-PROD_NAMESPACE=${K8S_NAMESPACE:-sg-prod}
+CHART_VERSION="0.6.2"
+DEV_NAMESPACE=${K8S_NAMESPACE:-cicd-dev}
+QA_NAMESPACE=${K8S_NAMESPACE:-cicd-qa}
+PROD_NAMESPACE=${K8S_NAMESPACE:-cicd-prod}
 VALUES_FILE=${VALUES_FILE:=k8s/values.yaml}
 VALUES_DEV_FILE=${VALUES_DEV_FILE:=k8s/values.dev.yaml}
 K8S_DIR=k8s

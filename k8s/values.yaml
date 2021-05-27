@@ -86,7 +86,7 @@ pingfederate-admin:
             file: devops-secret.env
         pf-keys.env:
           to-json:
-            file: devops-secret.env
+            file: pf-keys.env
   enabled: true
   # container:
   #   waitFor:
@@ -169,7 +169,6 @@ pingfederate-engine:
   image:
     repository: pingidentity
     name: pingfederate
-    # tag: 10.2.0-edge
     pullPolicy: Always
   secretVolumes:
     pf-master-key:
@@ -182,10 +181,6 @@ pingfederate-engine:
     SERVER_PROFILE_URL: https://github.com/pingdevopsprogram/reference-cicd
     PF_LOG_LEVEL: DEBUG
     PF_ADMIN_PORT: "443"
-    # will change per branch
-    # PF_OIDC_CLIENT_ID: ""
-    # PF_OIDC_CLIENT_SECRET: ""
-    # will change per account
     PF_OIDC_CLIENT_AUTHN_METHOD: client_secret_basic
     PF_OIDC_AUTHORIZATION_ENDPOINT: "https://auth.pingone.com/${P1_ADMIN_ENV_ID}/as/authorize"
     PF_OIDC_TOKEN_ENDPOINT: "https://auth.pingone.com/${P1_ADMIN_ENV_ID}/as/token"
@@ -336,18 +331,3 @@ pingdataconsole:
     SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
     SERVER_PROFILE_PATH: baseline/pingdataconsole
     SERVER_PROFILE_BRANCH: master
-  workload:
-    # annotations:
-    #   # telegraf.influxdata.com/ports: "8080,9090"
-    #   telegraf.influxdata.com/inputs: |+
-    #     [[inputs.http]]
-    #       urls = ["https://upgrade-helm-pingdirectory:1443/directory/v1/cn=LDAP%20Result%20Codes,cn=monitor"]
-    #       name_override = "pingdirectory_monitor"
-    #       data_format = "json"
-    #       insecure_skip_verify = true
-    #       username = "cn=administrator"
-    #       password = "2FederateM0re"
-    #   telegraf.influxdata.com/class: prometheus
-    #   prometheus.io/scrape: "true"
-    #   prometheus.io/path: /metrics
-    #   prometheus.io/port: "9273"

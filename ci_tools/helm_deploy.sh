@@ -64,7 +64,7 @@ helm upgrade --install \
 _timeoutElapsed=0
 while test ${_timeoutElapsed} -lt ${_timeout} ; do
   sleep 6
-  if test $(kubectl get pods -o go-template='{{range $index, $element := .items}}{{range .status.containerStatuses}}{{if not .ready}}{{$element.metadata.name}}{{"\n"}}{{end}}{{end}}{{end}}' | wc -l ) = 0 ; then
+  if test $(kubectl get pods -l app.kubernetes.io/instance="${RELEASE}" -n "${K8S_NAMESPACE}" -o go-template='{{range $index, $element := .items}}{{range .status.containerStatuses}}{{if not .ready}}{{$element.metadata.name}}{{"\n"}}{{end}}{{end}}{{end}}' | wc -l ) = 0 ; then
       break;
   fi
   _timeoutElapsed=$((_timeoutElapsed+6))
