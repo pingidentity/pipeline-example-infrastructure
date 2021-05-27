@@ -6,6 +6,7 @@ set -a
 test -f ./ci_tools/@localSecrets && . ./ci_tools/@localSecrets
 
 ## CI VARIABLES
+PROFILES_REPO_URL="https://github.com/pingidentity/pingidentity-devops-reference-pipeline.git"
 CHART_VERSION="0.6.2"
 DEV_NAMESPACE=${K8S_NAMESPACE:-cicd-dev}
 QA_NAMESPACE=${K8S_NAMESPACE:-cicd-qa}

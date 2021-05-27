@@ -105,10 +105,10 @@ pingfederate-admin:
     PF_CONSOLE_AUTHENTICATION: OIDC
     PF_ADMIN_API_AUTHENTICATION: NATIVE
     SERVER_PROFILE_BASE_PATH: profiles/pingfederate
-    SERVER_PROFILE_BASE_URL: https://github.com/pingdevopsprogram/reference-cicd
+    SERVER_PROFILE_BASE_URL: "${PROFILES_REPO_URL}"
     SERVER_PROFILE_PARENT: BASE
     SERVER_PROFILE_PATH: profiles/pingfederate_admin
-    SERVER_PROFILE_URL: https://github.com/pingdevopsprogram/reference-cicd
+    SERVER_PROFILE_URL: "${PROFILES_REPO_URL}"
     PF_ADMIN_PORT: "443"
     PF_LOG_LEVEL: "DEBUG"
     # data.json.subst specific vars. 
@@ -178,7 +178,7 @@ pingfederate-engine:
     PF_CONSOLE_AUTHENTICATION: OIDC
     PF_ADMIN_API_AUTHENTICATION: NATIVE
     SERVER_PROFILE_PATH: profiles/pingfederate
-    SERVER_PROFILE_URL: https://github.com/pingdevopsprogram/reference-cicd
+    SERVER_PROFILE_URL: "${PROFILES_REPO_URL}"
     PF_LOG_LEVEL: DEBUG
     PF_ADMIN_PORT: "443"
     PF_OIDC_CLIENT_AUTHN_METHOD: client_secret_basic
@@ -242,7 +242,7 @@ pingdirectory:
   enabled: true
   envs:
     SERVER_PROFILE_PATH: profiles/pingdirectory
-    SERVER_PROFILE_URL: https://github.com/pingdevopsprogram/reference-cicd 
+    SERVER_PROFILE_URL: "${PROFILES_REPO_URL}"
     MAKELDIF_USERS: "2000"
   container:
     replicaCount: 3
