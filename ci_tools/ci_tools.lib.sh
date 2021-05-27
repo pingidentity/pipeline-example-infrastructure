@@ -5,6 +5,7 @@ set -a
 # shellcheck source=@localSecrets
 test -f ./ci_tools/@localSecrets && . ./ci_tools/@localSecrets
 
+## CI VARIABLES
 CHART_VERSION="0.6.2"
 DEV_NAMESPACE=${K8S_NAMESPACE:-cicd-dev}
 QA_NAMESPACE=${K8S_NAMESPACE:-cicd-qa}
