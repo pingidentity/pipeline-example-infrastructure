@@ -22,6 +22,7 @@ This repository aims to provide a reference example of a development lifecycle w
 
 ## Roadmap
 
+- PingAccess GitOps
 - Licenses as bitnami sealed secret
 - Docs on PF GitOps
 - PD SSO from myping
