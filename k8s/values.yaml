@@ -49,7 +49,7 @@ global:
         agent-pre-populate-only: true
         log-level: info
         preserve-secret-case: true
-        role: ping-devops-gte-default
+        role: ${VAULT_AUTH_ROLE}
         secret-volume-path: /run/secrets
         serviceAccountName: vault-auth
       secretPrefix: secret/samirgandhi@pingidentity.com/${K8S_NAMESPACE}/
@@ -76,7 +76,7 @@ pingfederate-admin:
         agent-pre-populate-only: true
         log-level: info
         preserve-secret-case: true
-        role: ping-devops-gte-default
+        role: ${VAULT_AUTH_ROLE}
         secret-volume-path: /run/secrets
         serviceAccountName: vault-auth
       secretPrefix: secret/samirgandhi@pingidentity.com/${K8S_NAMESPACE}/

@@ -57,7 +57,7 @@ helm upgrade --install \
   --set pingfederate-engine.envs.PF_OIDC_CLIENT_SECRET="${pfEnvClientSecret}" \
   --set pingfederate-engine.envs.PF_PROFILE_SHA="${pingfederateSha}" \
   --set global.envs.SERVER_PROFILE_BRANCH="${REF}" \
-  --set pingfederate-admin.envs.SERVER_PROFILE_BASE_BRANCH="${REF}" \
+  --set global.envs.SERVER_PROFILE_BASE_BRANCH="${REF}" \
   -f "${_valuesFile}" ${_valuesDevFile} \
   --namespace "${K8S_NAMESPACE}" --version "${CHART_VERSION}" $_dryRun
 
