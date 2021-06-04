@@ -9,10 +9,9 @@ on:
       - prod
       - main
       - master
-    paths:
-      - 'ci_tools/**'
-      - 'k8s/**'
-      - 'profiles/**'
+    paths-ignore:
+      - "**/*.md"
+      - ".gitignore"
 
 
 name: DeployFeature
