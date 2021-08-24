@@ -28,7 +28,7 @@ global:
   image:
     repository: pingidentity
     name:
-    tag: 2104
+    tag: 2107
     pullPolicy: IfNotPresent
   license:
     secret:
@@ -134,15 +134,10 @@ pingfederate-admin:
     PF_OIDC_ROLE_EXPRESSIONADMIN: fullAdmin
     # don't have auditor and admin
     PF_OIDC_ROLE_AUDITOR: roleAuditor
-  workload:
-    securityContext:
-      fsGroup: 0
-      runAsUser: 0
-      runAsGroup: 0
   services:
     https:
-      servicePort: 443
-      containerPort: 443
+      servicePort: 9999
+      containerPort: 9999
       ingressPort: 443
       dataService: true
   probes:
