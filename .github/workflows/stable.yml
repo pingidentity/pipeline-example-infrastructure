@@ -3,10 +3,10 @@ on:
   # but only for the main branch
   push:
     branches:
-      - qa
-      - master
-      - main
-      - prod
+      - 'prod'
+    paths-ignore:
+      - "**.md"
+      - ".gitignore"
 
 
 name: DeployStable
