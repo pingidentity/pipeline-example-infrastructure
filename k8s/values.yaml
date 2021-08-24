@@ -109,7 +109,6 @@ pingfederate-admin:
     SERVER_PROFILE_PARENT: BASE
     SERVER_PROFILE_PATH: profiles/pingfederate_admin
     SERVER_PROFILE_URL: "${PROFILES_REPO_URL}"
-    PF_ADMIN_PORT: "443"
     PF_LOG_LEVEL: "DEBUG"
     # data.json.subst specific vars. 
     PA_ENGINE_PRIVATE_PORT_HTTPS: "3000"
