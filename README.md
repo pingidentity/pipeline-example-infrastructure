@@ -6,7 +6,19 @@
 
 **WORK IN PROGRESS**
 
-This repository aims to provide a reference example of a development lifecycle with PingIdentity Software Products. 
+This repository aims to provide a reference example of a development lifecycle with PingIdentity Software Products. This pipeline builds on the [Getting Started Repository](https://github.com/pingidentity/pingidentity-devops-getting-started) and uses popular technologies to show how Ping Identity software can be used in a DevOps environment. The repository can be presented through a number of demos:
+
+- GitOps
+  - GitFlow and Environment Promotion
+    - CI/CD with Github Actions
+    - deployment-as-code with Helm
+    - config-as-code profiles
+  - Secrets Management
+  - Automated Testing
+
+- Monitoring
+
+
 
 ## Current Features
 
@@ -22,7 +34,6 @@ This repository aims to provide a reference example of a development lifecycle w
 
 ## Roadmap
 
-- PingAccess GitOps
 - Licenses as bitnami sealed secret
 - Docs on PF GitOps
 - PD SSO from myping
