@@ -8,7 +8,7 @@ test -f ./ci_tools/@localSecrets && . ./ci_tools/@localSecrets
 ## CI VARIABLES
 PROFILES_REPO_URL="https://github.com/pingidentity/pingidentity-devops-reference-pipeline.git"
 VAULT_AUTH_ROLE="ping-dev-aws-us-east-2"
-CHART_VERSION="0.6.2"
+CHART_VERSION="0.7.3"
 DEV_NAMESPACE=${K8S_NAMESPACE:-cicd-dev}
 QA_NAMESPACE=${K8S_NAMESPACE:-cicd-qa}
 PROD_NAMESPACE=${K8S_NAMESPACE:-cicd-prod}

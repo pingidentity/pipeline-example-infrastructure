@@ -28,7 +28,7 @@ global:
   image:
     repository: pingidentity
     name:
-    tag: 2104
+    tag: 2107
     pullPolicy: IfNotPresent
   license:
     secret:
@@ -109,7 +109,6 @@ pingfederate-admin:
     SERVER_PROFILE_PARENT: BASE
     SERVER_PROFILE_PATH: profiles/pingfederate_admin
     SERVER_PROFILE_URL: "${PROFILES_REPO_URL}"
-    PF_ADMIN_PORT: "443"
     PF_LOG_LEVEL: "DEBUG"
     # data.json.subst specific vars. 
     PA_ENGINE_PRIVATE_PORT_HTTPS: "3000"
@@ -134,15 +133,10 @@ pingfederate-admin:
     PF_OIDC_ROLE_EXPRESSIONADMIN: fullAdmin
     # don't have auditor and admin
     PF_OIDC_ROLE_AUDITOR: roleAuditor
-  workload:
-    securityContext:
-      fsGroup: 0
-      runAsUser: 0
-      runAsGroup: 0
   services:
     https:
-      servicePort: 443
-      containerPort: 443
+      servicePort: 9999
+      containerPort: 9999
       ingressPort: 443
       dataService: true
   probes:
@@ -213,27 +207,38 @@ pingfederate-engine:
       prometheus.io/port: "9273"
   clustering:
     autoscaling:
-      enabled: false
-  #     minReplicas: 3
-  #     maxReplicas: 6
-  #     targetCPUUtilizationPercentage: 75
+      enabled: true
+      minReplicas: 3
+      maxReplicas: 6
+      targetCPUUtilizationPercentage: 70
   container:
     replicaCount: 3
-  probes:
-    liveness:
-      command: /opt/liveness.sh
-      initialDelaySeconds: 90
-      periodSeconds: 10
-      timeoutSeconds: 5
-      successThreshold: 1
-      failureThreshold: 2
-    readiness:
-      command: /opt/liveness.sh
-      initialDelaySeconds: 30
-      periodSeconds: 5
-      timeoutSeconds: 5
-      successThreshold: 1
-      failureThreshold: 4
+  # probes:
+  #   liveness:
+  #     command: /opt/liveness.sh
+  #     initialDelaySeconds: 90
+  #     periodSeconds: 10
+  #     timeoutSeconds: 5
+  #     successThreshold: 1
+  #     failureThreshold: 2
+  #   readiness:
+  #     command: /opt/liveness.sh
+  #     initialDelaySeconds: 30
+  #     periodSeconds: 5
+  #     timeoutSeconds: 5
+  #     successThreshold: 1
+  #     failureThreshold: 4
+  includeSidecars:
+    - splunk-log-forwarder
+  includeInitContainers:
+    - splunk-conf
+  includeVolumes:
+    - product-logs
+    - splunk-config
+    - splunk-config-init
+  volumeMounts:
+    - mountPath: /opt/logs
+      name: product-logs
 
 #############################################################
 # pingdirectory values
@@ -332,3 +337,44 @@ pingdataconsole:
     SERVER_PROFILE_PATH: baseline/pingdataconsole
     SERVER_PROFILE_BRANCH: master
     
+
+sidecars:
+  splunk-log-forwarder:
+    name: splunk-uf
+    image: splunk/universalforwarder:latest
+    volumeMounts:
+    - name: splunk-config
+      mountPath: /opt/splunkforwarder/etc/system/local
+    - name: product-logs
+      mountPath: /var/log/instance
+    env:
+    - name: SPLUNK_START_ARGS
+      value: --accept-license
+    - name: SPLUNK_PASSWORD
+      value: 2FederateM0re!
+    - name: SPLUNK_USER
+      value: splunk
+    - name: SPLUNK_CMD
+      value: add monitor /var/log/
+
+initContainers:
+  splunk-conf:
+    name: volume-permissions
+    image: busybox
+    command: ['sh', '-c', 'cp /configs/* /opt/splunkforwarder/etc/system/local/']
+    volumeMounts:
+    - name: splunk-config-init
+      mountPath: /configs
+    - name: splunk-config
+      mountPath: /opt/splunkforwarder/etc/system/local
+
+
+volumes:
+  product-logs:
+    emptyDir: {}
+  splunk-config:
+    emptyDir: {}
+  splunk-config-init:
+    configMap: 
+      name: splunk-config-init
+      defaultMode: 0777
