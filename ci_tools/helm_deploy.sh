@@ -33,16 +33,18 @@ if test "${K8S_NAMESPACE}" = "${DEV_NAMESPACE}" ; then
   _valuesDevFile="-f ${VALUES_DEV_FILE}.final"
 fi
 
-envsubst < "${VALUES_FILE}" > "${VALUES_FILE}.final"
-_valuesFile="${VALUES_FILE}.final"
-
-# cat $VALUES_FILE
-
 ## DELETE ONCE VAULT IS WORKING
 ## Getting Client ID+Secret for this app.
 getPfClientAppInfo
 
-kubectl apply -f "${K8S_DIR}/secrets/${K8S_NAMESPACE}"
+## envsubst all the things
+envsubst < "${VALUES_FILE}" > "${VALUES_FILE}.final"
+_valuesFile="${VALUES_FILE}.final"
+expandFiles "${MANIFEST_DIR}"
+
+
+## Deploy Splunk Config
+applyManifests "${MANIFEST_DIR}/splunk-config" "${MANIFEST_DIR}/secrets/${K8S_NAMESPACE}" $_dryRun
 
 # # install the new profiles, but don't move on until install is successfully deployed. 
 # # tied to chart version to avoid breaking changes.

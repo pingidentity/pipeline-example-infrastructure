@@ -76,6 +76,8 @@ jobs:
         P1_ADMIN_ENV_ID: ${{ secrets.P1_ADMIN_ENV_ID}}
         PF_ADMIN_WORKER_ID: ${{ secrets.PF_ADMIN_WORKER_ID}}
         PF_ADMIN_WORKER_SECRET: ${{ secrets.PF_ADMIN_WORKER_SECRET}}
+        SPLUNK_PASSWORD: ${{ secrets.SPLUNK_PASSWORD}}
+        SPLUNK_HEC_TOKEN: ${{ secrets.SPLUNK_HEC_TOKEN}}
       run: |
         export REF=$(echo $GITHUB_REF | sed -e "s#refs/heads/##g")
         sh ci_tools/helm_deploy.sh
