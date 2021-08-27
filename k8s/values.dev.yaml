@@ -28,9 +28,9 @@ pingfederate-engine:
 #     name: pingfederate
 #     tag: 10.2.0-edge
 #     pullPolicy: Always
-#   clustering:
-#     autoscaling:
-#       enabled: false
+  clustering:
+    autoscaling:
+      enabled: false
   container:
     replicaCount: 1
 
