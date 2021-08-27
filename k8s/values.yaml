@@ -138,6 +138,7 @@ pingfederate-admin:
     PF_OIDC_ROLE_EXPRESSIONADMIN: fullAdmin
     # don't have auditor and admin
     PF_OIDC_ROLE_AUDITOR: roleAuditor
+    TAIL_LOG_FILES: "/opt/logs/server.log /opt/logs/splunk-audit.log"
   services:
     https:
       servicePort: 9999
@@ -195,6 +196,7 @@ pingfederate-engine:
     PF_OIDC_ROLE_USERADMIN: fullAdmin
     PF_OIDC_ROLE_EXPRESSIONADMIN: fullAdmin
     PF_OIDC_ROLE_AUDITOR: roleAuditor
+    TAIL_LOG_FILES: "/opt/logs/server.log /opt/logs/splunk-audit.log"
   workload:
     type: Deployment
     annotations:

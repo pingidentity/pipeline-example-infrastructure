@@ -262,7 +262,7 @@ dsconfig create-monitoring-endpoint \
   --type statsd \
   --endpoint-name StatsDSplunkEndPoint \
   --set enabled:true \
-  --set hostname:splunk \
+  --set hostname:splunk.internal.ping-cluster.com \
   --set server-port:9990 \
   --set connection-type:unencrypted-udp
 
