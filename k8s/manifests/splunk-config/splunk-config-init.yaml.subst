@@ -21,7 +21,7 @@ data:
     [httpout]
     #CHANGEME
     httpEventCollectorToken = ${SPLUNK_HEC_TOKEN}
-    uri = https://splunk:8088
+    uri = https://splunk.internal.ping-cluster.com:8088
 
   inputs.conf: |-
     [monitor:///var/log/*.log]

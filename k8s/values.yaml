@@ -33,6 +33,11 @@ global:
   license:
     secret:
       devOps: devops-secret
+  workload:
+    securityContext:
+      fsGroup: 9999
+      runAsUser: null
+      runAsGroup: null
 
   #   secrets:
   #     {secret-name}:
