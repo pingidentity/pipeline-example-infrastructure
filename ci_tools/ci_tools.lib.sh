@@ -15,6 +15,7 @@ PROD_NAMESPACE=${K8S_NAMESPACE:-cicd-prod}
 VALUES_FILE=${VALUES_FILE:=k8s/values.yaml}
 VALUES_DEV_FILE=${VALUES_DEV_FILE:=k8s/values.dev.yaml}
 K8S_DIR=k8s
+MANIFEST_DIR="${K8S_DIR}/manifests"
 CURRENT_SHA=$(git log -n 1 --pretty=format:%h)
 
 case "${REF}" in
@@ -86,4 +87,39 @@ getPfClientAppInfo(){
   pfEnvClientSecret=$(curl -sS --location --request GET "https://api.pingone.com/v1/environments/${P1_ADMIN_ENV_ID}/applications/${pfEnvClientId}/secret" \
     --header "Authorization: Bearer ${p1Token}" \
     | jq -r '.secret')
+}
+
+getEnvKeys() {
+    env | cut -d'=' -f1 | sed -e 's/^/$/'
+}
+
+expandFiles() {
+    #
+    # First, let's process all files that end in .subst
+    #
+    echo $*
+    _expandPath="${1}"
+    echo "  Processing templates"
+
+    find "${_expandPath}" -type f -iname \*.subst > tmp
+    while IFS= read -r template; do
+        echo "    t - ${template}"
+        _templateDir="$(dirname ${template})"
+        _templateBase="$(basename ${template})"
+        envsubst "'$(getEnvKeys)'" < "${template}" > "${_templateDir}/@${_templateBase%.subst}"
+    done < tmp
+    rm tmp
+}
+
+applyManifests() {
+  folders=${*}
+  for folder in $folders ; do
+    if test $folder != "--dry-run" ; then
+      find "${folder}" -type f ! -name "*.subst" >> k8stmp
+      while IFS= read -r k8sFile; do
+        kubectl apply -f "$k8sFile" $_dryRun -o yaml
+      done < k8stmp
+      rm k8stmp
+    fi
+  done
 }

@@ -20,7 +20,7 @@ data:
     
     [httpout]
     #CHANGEME
-    httpEventCollectorToken = 
+    httpEventCollectorToken = ${SPLUNK_HEC_TOKEN}
     uri = https://splunk:8088
 
   inputs.conf: |-
