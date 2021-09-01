@@ -1,0 +1,64 @@
+# global:
+  # envs:
+    # need this because it's part of config, but not
+    # PD_DELEGATOR_HTTPS_PUBLIC_PORT: "443"
+    
+# #############################################################
+# # pingfederate-admin values
+# #############################################################
+pingfederate-admin:
+  envs:
+    K8S_INCREMENT_PORTS: "false"
+    DNS_QUERY_LOCATION: "${RELEASE}-pingfederate-admin-cluster.ping.svc.cluster.local,sg-pingfederate.aus.ping-multi-cluster.com"
+#   enabled: true
+#   # container:
+#   #   waitFor:
+#   #     pingdirectory:
+#   #       service: ldaps
+#   image:
+#     repository: pingidentity
+#     name: pingfederate
+#     tag: 10.2.0-edge
+#     pullPolicy: Always
+
+# #############################################################
+# # pingfederate-engine values
+# #############################################################
+pingfederate-engine:
+#   enabled: true
+#   image:
+#     repository: pingidentity
+#     name: pingfederate
+#     tag: 10.2.0-edge
+#     pullPolicy: Always
+  clustering:
+    autoscaling:
+      enabled: false
+  container:
+    replicaCount: 1
+
+#############################################################
+# pingdirectory values
+#############################################################
+pingdirectory:
+  envs:
+    K8S_CLUSTERS: us eu
+    K8S_CLUSTER: us
+    K8S_SEED_CLUSTER: us
+    K8S_NUM_REPLICAS: "9"
+    K8S_POD_HOSTNAME_PREFIX: "${RELEASE}-pingdirectory-"
+    K8S_POD_HOSTNAME_SUFFIX:  ".us.internal.ping-cluster.com"
+    K8S_SEED_HOSTNAME_SUFFIX:  ".us.internal.ping-cluster.com"
+    K8S_INCREMENT_PORTS: "false"
+  services:
+    clusterExternalDNSHostname: usa.ping-multi-cluster.com
+
+#############################################################
+# pingdataconsole values
+#############################################################
+# pingdataconsole:
+#   enabled: true
+  # envs:
+  #   SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
+  #   SERVER_PROFILE_PATH: baseline/pingdataconsole
+  #   SERVER_PROFILE_BRANCH: master

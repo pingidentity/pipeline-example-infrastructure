@@ -68,14 +68,22 @@ jobs:
     #     PF_ADMIN_WORKER_SECRET: ${{ secrets.PF_ADMIN_WORKER_SECRET}}
     #     SLACK_WEBHOOK_ID: ${{ secrets.SLACK_WEBHOOK_ID }}
       # eval sha of profile dirs and deploy chart
-    - name: Deploy Changes
+    - name: Deploy Changes to US
       env:
         P1_ADMIN_ENV_ID: ${{ secrets.P1_ADMIN_ENV_ID}}
         PF_ADMIN_WORKER_ID: ${{ secrets.PF_ADMIN_WORKER_ID}}
         PF_ADMIN_WORKER_SECRET: ${{ secrets.PF_ADMIN_WORKER_SECRET}}
       run: |
         export REF=$(echo $GITHUB_REF | sed -e "s#refs/heads/##g")
-        sh ci_tools/helm_deploy.sh
+        sh ci_tools/helm_deploy.sh --region us
+    - name: Deploy Changes to EU
+      env:
+        P1_ADMIN_ENV_ID: ${{ secrets.P1_ADMIN_ENV_ID}}
+        PF_ADMIN_WORKER_ID: ${{ secrets.PF_ADMIN_WORKER_ID}}
+        PF_ADMIN_WORKER_SECRET: ${{ secrets.PF_ADMIN_WORKER_SECRET}}
+      run: |
+        export REF=$(echo $GITHUB_REF | sed -e "s#refs/heads/##g")
+        sh ci_tools/helm_deploy.sh --region eu
     - name: Integration Test
       run: ci_tools/run_postman.sh k8s/integrationtest.yaml
     # - name: Environment Info
