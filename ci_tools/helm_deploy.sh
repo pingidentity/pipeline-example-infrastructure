@@ -115,6 +115,12 @@ if test -z $_dryRun ; then
     if test $(kubectl get pods -l app.kubernetes.io/instance="${RELEASE}" -n "${K8S_NAMESPACE}" -o go-template='{{range $index, $element := .items}}{{range .status.containerStatuses}}{{if not .ready}}{{$element.metadata.name}}{{"\n"}}{{end}}{{end}}{{end}}' | wc -l ) = 0 ; then
       readyCount=$(( readyCount+1 ))
       sleep 4
+    else 
+      crashingPods=$(kubectl get pods -l app.kubernetes.io/instance="${RELEASE}" -n "${K8S_NAMESPACE}" -o go-template='{{range $index, $element := .items}}{{range .status.containerStatuses}}{{if lt .restartCount 2 }}{{$element.metadata.name}}{{"\n"}}{{end}}{{end}}{{end}}')
+      if test "$($crashingPods | wc -l)" -ne 0 ; then
+        echo "ERROR: Found pods crashing $crashingPods"
+        _timeoutElapsed=$(( _timeout+1 ))
+      fi
     fi
     _timeoutElapsed=$((_timeoutElapsed+6))
     test ${readyCount} -ge 3 && break
@@ -124,6 +130,7 @@ if test -z $_dryRun ; then
   if test "${?}" -ne 0 ; then
     ## helm diff to see what changed and could have cause error.
     cat tmp/helmdiff.txt
+    echo "ERROR when deploying release"
     exit 1
   fi
 fi
