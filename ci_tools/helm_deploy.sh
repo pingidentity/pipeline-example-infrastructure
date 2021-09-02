@@ -99,7 +99,7 @@ if test -n $_dryRun ; then
   _timeoutElapsed=0
   readyCount=0
   while test ${_timeoutElapsed} -lt ${_timeout} ; do
-    sleep 
+    sleep 6
     if test $(kubectl get pods -l app.kubernetes.io/instance="${RELEASE}" -n "${K8S_NAMESPACE}" -o go-template='{{range $index, $element := .items}}{{range .status.containerStatuses}}{{if not .ready}}{{$element.metadata.name}}{{"\n"}}{{end}}{{end}}{{end}}' | wc -l ) = 0 ; then
       readyCount=$(( readyCount+1 ))
       sleep 4
