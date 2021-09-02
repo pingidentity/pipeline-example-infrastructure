@@ -88,7 +88,6 @@ helm upgrade --install \
   -f "${VALUES_FILE}" ${_valuesDevFile} \
   --namespace "${K8S_NAMESPACE}" --version "${CHART_VERSION}" $_dryRun
 
-##TODO improve error watching by looking for crashloop
 if test -z $_dryRun ; then 
   ## try to minimize extended crashloops but also enough time to deploy
   _timeout=600
@@ -101,7 +100,8 @@ if test -z $_dryRun ; then
     sed s/'+  '/'   '/g tmp/helmdiff.txt > tmp/helmdiff.yaml
     sed -i.bak s/'-  '/'   '/g tmp/helmdiff.yaml
     ## If pd change give a lot of time
-    if test $(yq e '.* | select(.metadata.name == env(NAME)) | .spec.template.metadata.annotations' tmp/helmdiff.yaml | grep -c checksum/config) -eq 0 ; then
+    _pdName="${RELEASE}-pingdirectory"
+    if test $(yq e '.* | select(.metadata.name == env(_pdName)) | .spec.template.metadata.annotations' tmp/helmdiff.yaml | grep -c checksum/config) -eq 0 ; then
       _timeout=1800
     fi
   else
@@ -116,8 +116,9 @@ if test -z $_dryRun ; then
       readyCount=$(( readyCount+1 ))
       sleep 4
     else 
-      crashingPods=$(kubectl get pods -l app.kubernetes.io/instance="${RELEASE}" -n "${K8S_NAMESPACE}" -o go-template='{{range $index, $element := .items}}{{range .status.containerStatuses}}{{if lt .restartCount 2 }}{{$element.metadata.name}}{{"\n"}}{{end}}{{end}}{{end}}')
-      if test "$($crashingPods | wc -l)" -ne 0 ; then
+      crashingPods=$(kubectl get pods -l app.kubernetes.io/instance="${RELEASE}" -n "${K8S_NAMESPACE}" -o go-template='{{range $index, $element := .items}}{{range .status.containerStatuses}}{{if gt .restartCount 2 }}{{$element.metadata.name}}{{"\n"}}{{end}}{{end}}{{end}}')
+      numCrashing=$(echo $crashingPods | wc -c)
+      if test $numCrashing -gt 5 ; then
         echo "ERROR: Found pods crashing $crashingPods"
         _timeoutElapsed=$(( _timeout+1 ))
       fi
