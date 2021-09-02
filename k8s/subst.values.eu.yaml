@@ -6,7 +6,10 @@
 # #############################################################
 # # pingfederate-admin values
 # #############################################################
-# pingfederate-admin:
+pingfederate-admin:
+  envs:
+    K8S_INCREMENT_PORTS: "false"
+    DNS_QUERY_LOCATION: "${RELEASE}-pingfederate-admin-cluster.ping.svc.cluster.local,${RELEASE}-pingfederate.us.internal.ping-cluster.com"
 #   enabled: true
 #   # container:
 #   #   waitFor:
@@ -17,6 +20,8 @@
 #     name: pingfederate
 #     tag: 10.2.0-edge
 #     pullPolicy: Always
+  services:
+    clusterExternalDNSHostname: ${RELEASE}-pingfederate.eu.internal.ping-cluster.com
 
 # #############################################################
 # # pingfederate-engine values
@@ -38,13 +43,17 @@ pingfederate-engine:
 # pingdirectory values
 #############################################################
 pingdirectory:
-  # enabled: true
-  # envs:
-  #   SERVER_PROFILE_PATH: profiles/pingdirectory
-  #   SERVER_PROFILE_URL: https://github.com/pingdevopsprogram/reference-cicd 
-  #   MAKELDIF_USERS: "2000"
-  container:
-    replicaCount: 1
+  envs:
+    K8S_CLUSTERS: us eu
+    K8S_CLUSTER: eu
+    K8S_SEED_CLUSTER: us
+    K8S_NUM_REPLICAS: "12"
+    K8S_POD_HOSTNAME_PREFIX: "${RELEASE}-pingdirectory-"
+    K8S_POD_HOSTNAME_SUFFIX:  ".eu.internal.ping-cluster.com"
+    K8S_SEED_HOSTNAME_SUFFIX:  ".us.internal.ping-cluster.com"
+    K8S_INCREMENT_PORTS: "false"
+  services:
+    clusterExternalDNSHostname: eu.internal.ping-cluster.com
 
 #############################################################
 # pingdataconsole values

@@ -38,6 +38,8 @@ global:
       fsGroup: 9999
       runAsUser: null
       runAsGroup: null
+    nodeSelector:
+      alpha.eksctl.io/nodegroup-name: base-r5-xlarge-1-20
 
   #   secrets:
   #     {secret-name}:

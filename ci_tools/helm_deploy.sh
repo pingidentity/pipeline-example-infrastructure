@@ -1,5 +1,4 @@
 #!/usr/bin/env sh
-set -e
 
 usage ()
 {
@@ -54,12 +53,6 @@ for D in ./profiles/* ; do
   fi
 done
 
-## try to minimize extended crashloops but also enough time to deploy
-##TODO improve error watching
-_timeout=600
-test "${pingdirectorySha}" = "${CURRENT_SHA}" && _timeout=1200
-test ! "$(helm history "${RELEASE}")" && _timeout=900
-
 ## DELETE ONCE VAULT IS WORKING
 ## Getting Client ID+Secret for this app.
 getPfClientAppInfo
@@ -95,7 +88,26 @@ helm upgrade --install \
   -f "${VALUES_FILE}" ${_valuesDevFile} \
   --namespace "${K8S_NAMESPACE}" --version "${CHART_VERSION}" $_dryRun
 
-if test -n $_dryRun ; then 
+##TODO improve error watching by looking for crashloop
+if test -z $_dryRun ; then 
+  ## try to minimize extended crashloops but also enough time to deploy
+  _timeout=600
+    revCurrent=$(helm ls --filter "${RELEASE}" -o json | jq -r '.[0].revision')
+    revPrevious=$(( revCurrent-1 ))
+    test ! -d tmp && mkdir tmp
+    helm diff revision "${RELEASE}" $revCurrent $revPrevious --no-color > tmp/helmdiff.txt
+  if test $? -eq 0 ; then
+    ## Check if pd changed. 
+    sed s/'+  '/'   '/g tmp/helmdiff.txt > tmp/helmdiff.yaml
+    sed -i.bak s/'-  '/'   '/g tmp/helmdiff.yaml
+    ## If pd change give a lot of time
+    if test $(yq e '.* | select(.metadata.name == env(NAME)) | .spec.template.metadata.annotations' tmp/helmdiff.yaml | grep -c checksum/config) -eq 0 ; then
+      _timeout=1800
+    fi
+  else
+    _timeout=900
+  fi
+
   _timeoutElapsed=0
   readyCount=0
   while test ${_timeoutElapsed} -lt ${_timeout} ; do
@@ -111,9 +123,7 @@ if test -n $_dryRun ; then
   ## run helm diff to show what will change to help identify errors
   if test "${?}" -ne 0 ; then
     ## helm diff to see what changed and could have cause error.
-    revCurrent=$(helm ls --filter "${RELEASE}" -o json | jq -r '.[0].revision')
-    revPrevious=$(( revCurrent-1 ))
-    helm diff revision "${RELEASE}" $revCurrent $revPrevious
+    cat tmp/helmdiff.txt
     exit 1
   fi
 fi

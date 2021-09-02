@@ -4,3 +4,4 @@
 values.*yaml
 splunk-config-init.yaml
 values.yaml
+tmp*

@@ -100,14 +100,14 @@ expandFiles() {
     _expandPath="${1}"
     echo "  Processing templates"
 
-    find "${_expandPath}" -type f -iname "subst.*" > tmp
+    find "${_expandPath}" -type f -iname "subst.*" > tmpFileList
     while IFS= read -r template; do
         echo "    t - ${template}"
         _templateDir="$(dirname ${template})"
         _templateBase="$(basename ${template})"
         envsubst "'$(getEnvKeys)'" < "${template}" > "${_templateDir}/${_templateBase#subst.}"
-    done < tmp
-    rm tmp
+    done < tmpFileList
+    rm tmpFileList
 }
 
 applyManifests() {

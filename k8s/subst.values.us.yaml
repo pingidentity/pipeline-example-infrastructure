@@ -9,7 +9,7 @@
 pingfederate-admin:
   envs:
     K8S_INCREMENT_PORTS: "false"
-    DNS_QUERY_LOCATION: "${RELEASE}-pingfederate-admin-cluster.ping.svc.cluster.local,sg-pingfederate.aus.ping-multi-cluster.com"
+    DNS_QUERY_LOCATION: "${RELEASE}-pingfederate-admin-cluster.ping.svc.cluster.local,${RELEASE}-pingfederate.eu.internal.ping-cluster.com"
 #   enabled: true
 #   # container:
 #   #   waitFor:
@@ -20,6 +20,8 @@ pingfederate-admin:
 #     name: pingfederate
 #     tag: 10.2.0-edge
 #     pullPolicy: Always
+  services:
+    clusterExternalDNSHostname: ${RELEASE}-pingfederate.us.internal.ping-cluster.com
 
 # #############################################################
 # # pingfederate-engine values
@@ -45,13 +47,13 @@ pingdirectory:
     K8S_CLUSTERS: us eu
     K8S_CLUSTER: us
     K8S_SEED_CLUSTER: us
-    K8S_NUM_REPLICAS: "9"
+    K8S_NUM_REPLICAS: "12"
     K8S_POD_HOSTNAME_PREFIX: "${RELEASE}-pingdirectory-"
     K8S_POD_HOSTNAME_SUFFIX:  ".us.internal.ping-cluster.com"
     K8S_SEED_HOSTNAME_SUFFIX:  ".us.internal.ping-cluster.com"
     K8S_INCREMENT_PORTS: "false"
   services:
-    clusterExternalDNSHostname: usa.ping-multi-cluster.com
+    clusterExternalDNSHostname: us.internal.ping-cluster.com
 
 #############################################################
 # pingdataconsole values
