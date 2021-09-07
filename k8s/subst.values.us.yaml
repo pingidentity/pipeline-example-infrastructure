@@ -10,6 +10,7 @@ pingfederate-admin:
   envs:
     K8S_INCREMENT_PORTS: "false"
     DNS_QUERY_LOCATION: "${RELEASE}-pingfederate-admin-cluster.ping.svc.cluster.local,${RELEASE}-pingfederate.eu.internal.ping-cluster.com"
+    OPERATIONAL_MODE: CLUSTERED_CONSOLE
 #   enabled: true
 #   # container:
 #   #   waitFor:
