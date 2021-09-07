@@ -32,7 +32,7 @@ mkdir ${HOME}/.kube
 echo "$KUBE_CONFIG_YAML" | base64 --decode > ${HOME}/.kube/config
 chmod 400 ${HOME}/.kube/config
 
-# INSTALL helm
+# INSTALL helm and helm diff
 curl https://baltocdn.com/helm/signing.asc | sudo apt-key add -
 sudo apt-get install apt-transport-https --yes
 echo "deb https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
@@ -40,6 +40,13 @@ sudo apt-get update
 sudo apt-get -y install helm
 helm repo add pingidentity https://helm.pingidentity.com/
 helm repo update
+
+helm plugin install https://github.com/databus23/helm-diff 
+
+sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys CC86BB64
+sudo add-apt-repository ppa:rmescandon/yq
+sudo apt update
+sudo apt install yq -y
 
 
 kubectl create secret generic devops-secret --from-literal=PING_IDENTITY_DEVOPS_USER="${PING_IDENTITY_DEVOPS_USER}" --from-literal=PING_IDENTITY_DEVOPS_KEY="${PING_IDENTITY_DEVOPS_KEY}"

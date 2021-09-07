@@ -1,3 +1,7 @@
 @*
 *.final
 .DS_Store
+values.*yaml
+splunk-config-init.yaml
+values.yaml
+tmp*
