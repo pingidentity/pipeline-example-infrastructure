@@ -30,7 +30,7 @@ jobs:
         sh ci_tools/install_dependencies.sh
         echo "ended install"
         echo ${{ github.event_name }}
-      with:
+      env:
         KUBE_CONFIL_YAML: ${{ secrets.KUBE_CONFIG_YAML }}
       # eval sha of profile dirs and deploy chart
     - name: Cleanup Feature K8S Env

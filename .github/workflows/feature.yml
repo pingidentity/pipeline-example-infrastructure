@@ -36,7 +36,7 @@ jobs:
         sh ci_tools/install_dependencies.sh
         echo "ended install"
         echo ${{ github.event_name }}
-      with:
+      env:
         KUBE_CONFIL_YAML: ${{ secrets.KUBE_CONFIG_YAML }}
       # if new branch, postman collection to create myping env
     - name: Create MyPing Env

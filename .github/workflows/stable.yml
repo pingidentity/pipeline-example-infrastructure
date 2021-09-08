@@ -33,7 +33,7 @@ jobs:
         sh ci_tools/install_dependencies.sh
         echo "ended install"
         echo ${{ github.event_name }}
-      with:
+      env:
         KUBE_CONFIL_YAML: ${{ secrets.KUBE_CONFIG_YAML }}
 
 
