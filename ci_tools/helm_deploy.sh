@@ -100,8 +100,8 @@ if test -z $_dryRun ; then
     sed s/'+  '/'   '/g tmp/helmdiff.txt > tmp/helmdiff.yaml
     sed -i.bak s/'-  '/'   '/g tmp/helmdiff.yaml
     ## If pd change give a lot of time
-    _pdName="${RELEASE}-pingdirectory"
-    if test $(yq e '.* | select(.metadata.name == env(_pdName)) | .spec.template.metadata.annotations' tmp/helmdiff.yaml | grep -c checksum/config) -eq 0 ; then
+    export _pdName="${RELEASE}-pingdirectory"
+    if test $(yq e '.* | select(.metadata.name == env(_pdName)) | .spec.template.metadata.annotations' tmp/helmdiff.yaml | grep -c checksum/config) -ne 0 ; then
       _timeout=1800
     fi
   else
