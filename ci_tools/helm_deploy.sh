@@ -38,6 +38,7 @@ while ! test -z ${1} ; do
   shift
 done
 
+set -e
 set -a
 # shellcheck source=./ci_tools.lib.sh
 . ./ci_tools/ci_tools.lib.sh
