@@ -6,32 +6,28 @@ set -a
 test -f ./ci_tools/@localSecrets && . ./ci_tools/@localSecrets
 
 ## CI VARIABLES
-PROFILES_REPO_URL="https://github.com/pingidentity/pingidentity-devops-reference-pipeline.git"
-VAULT_AUTH_ROLE="ping-dev-aws-us-east-2"
-CHART_VERSION="0.7.5"
-DEV_NAMESPACE=${K8S_NAMESPACE:-cicd-dev}
-QA_NAMESPACE=${K8S_NAMESPACE:-cicd-qa}
-PROD_NAMESPACE=${K8S_NAMESPACE:-cicd-prod}
-K8S_DIR=k8s
-MANIFEST_DIR="${K8S_DIR}/manifests"
-CURRENT_SHA=$(git log -n 1 --pretty=format:%h)
-
 case "${REF}" in
-  qa )
-    RELEASE=${RELEASE:=qa} 
-    K8S_NAMESPACE="${QA_NAMESPACE}"
-    ;;
   prod ) 
     RELEASE=${RELEASE:=prod}
-    K8S_NAMESPACE="${PROD_NAMESPACE}"
+    K8S_NAMESPACE="cicd-prod"
     ;;
   * )
     RELEASE="${REF}"
-    K8S_NAMESPACE="${DEV_NAMESPACE}" 
+    K8S_NAMESPACE="cicd-dev" 
     ;;
 esac
 
-test -n "${K8S_CLUSTER}" && kubectl config use-context "${K8S_CLUSTER}"
+PROFILES_REPO_URL="https://github.com/pingidentity/pingidentity-devops-reference-pipeline.git"
+VAULT_AUTH_ROLE="ping-dev-aws-us-east-2"
+CHART_VERSION="0.7.5"
+K8S_DIR=k8s
+MANIFEST_DIR="${K8S_DIR}/manifests"
+K8S_CLUSTER=${K8S_CLUSTER:-us}
+K8S_SECRETS_DIR="${MANIFEST_DIR}/${K8S_CLUSTER}/${K8S_NAMESPACE}/secrets"
+CURRENT_SHA=$(git log -n 1 --pretty=format:%h)
+
+
+kubectl config use-context "${K8S_CLUSTER}"
 kubectl config set-context --current --namespace="${K8S_NAMESPACE}"
 
 getGlobalVars() {

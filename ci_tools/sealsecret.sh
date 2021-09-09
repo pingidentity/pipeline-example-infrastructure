@@ -5,22 +5,29 @@ set -a
 set -e
 # shellcheck source=@localSecrets
 test -f ./ci_tools/@localSecrets && . ./ci_tools/@localSecrets
+# shellcheck source=./ci_tools.lib.sh
+. ./ci_tools/ci_tools.lib.sh
 
-set -x
+# set -x
 _initialDir="${PWD}"
 _scriptDir="${PWD}/ci_tools"
+k8sNamespace="${K8S_NAMESPACE}"
+# k8sNamespace="${K8S_NAMESPACE}"
 # cd "${_scriptDir}" || exit
+
 
 usage ()
 {
 cat <<END_USAGE
+This script will create a Bitnami SealedSecret file
+  The namespace for secret is based on ci_tools vars
 Usage:  {options} 
     * - required
     where {options} include:
-    -n*
-        namespace for secret
     -f*
         file to encrypt
+    -s
+        secret resource name
 END_USAGE
 exit 99
 }
@@ -37,13 +44,12 @@ while ! test -z ${1} ; do
     -f)
       shift
       inputFile="${1}"
-      inputFileClean="$(basename inputFile | sed s/@//)" ;;
-    -n)
-      shift
-      k8sNamespace="${1}" ;;
+      inputFileClean="$(basename $inputFile | sed s/@//)" ;;
     -s)
       shift
       secretName="${1}";;
+    -v)
+      set -x;;
     -h|--help)
       exit_usage "./sealsecret.sh -n cicd-dev -f full/path/to/Pingdirectory.lic -s pingdirectory-license
                    ";;
@@ -53,14 +59,18 @@ while ! test -z ${1} ; do
   shift
 done
 
-if test -z "${inputFile}" || test -z "${secretName}" || test -z "${k8sNamespace}"; then
+if test -z "${inputFile}"; then
   exit_usage
 fi
 
-test ! -d tmp && mkdir tmp
-kubectl create secret generic "${secretName}" --dry-run=client --from-file="${inputFile}" -n  "${k8sNamespace}" -o json > tmp/mysecret.json
+if test -z "${secretName}"; then
+  secretName="${inputFileClean%.*}"
+fi
 
-test ! -d "k8s/secrets/${k8sNamespace}" && mkdir "k8s/secrets/${k8sNamespace}"
-kubeseal <tmp/mysecret.json >"k8s/secrets/${k8sNamespace}/${secretName}".json
+test ! -d tmp && mkdir tmp
+kubectl create secret generic "${secretName}" --dry-run=client --from-file="${inputFile}" -n  "${K8S_NAMESPACE}" -o json > tmp/mysecret.json
+
+test ! -d "${K8S_SECRETS_DIR}" && mkdir -p "${K8S_SECRETS_DIR}"
+kubeseal < tmp/mysecret.json > "${K8S_SECRETS_DIR}/${secretName}.json"
 
 rm -rf tmp
