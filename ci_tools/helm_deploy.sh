@@ -70,7 +70,7 @@ if test "${K8S_NAMESPACE}" = "${DEV_NAMESPACE}" ; then
 fi
 
 ## Deploy any relevant k8s manifests
-applyManifests "${MANIFEST_DIR}/splunk-config" "${MANIFEST_DIR}/secrets/${K8S_NAMESPACE}" $_dryRun
+applyManifests "${MANIFEST_DIR}/splunk-config" "${K8S_SECRETS_DIR}" $_dryRun
 
 ## install the new profiles, but don't move on until install is successfully deployed. 
 ## tied to chart version to avoid breaking changes.
