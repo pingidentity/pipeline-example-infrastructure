@@ -5,15 +5,19 @@ set -a
 # shellcheck source=@localSecrets
 test -f ./ci_tools/@localSecrets && . ./ci_tools/@localSecrets
 
+DEV_NAMESPACE=${K8S_NAMESPACE:-cicd-dev}
+QA_NAMESPACE=${K8S_NAMESPACE:-cicd-qa}
+PROD_NAMESPACE=${K8S_NAMESPACE:-cicd-prod}
+
 ## CI VARIABLES
 case "${REF}" in
   prod ) 
     RELEASE=${RELEASE:=prod}
-    K8S_NAMESPACE="cicd-prod"
+    K8S_NAMESPACE="${PROD_NAMESPACE}"
     ;;
   * )
     RELEASE="${REF}"
-    K8S_NAMESPACE="cicd-dev" 
+    K8S_NAMESPACE="${DEV_NAMESPACE}" 
     ;;
 esac
 
