@@ -8,7 +8,7 @@
 # #############################################################
 pingfederate-admin:
   envs:
-    DNS_QUERY_LOCATION: "${RELEASE}-pingfederate-admin-cluster.ping.svc.cluster.local,${RELEASE}-pingfederate.eu.internal.ping-cluster.com"
+    DNS_QUERY_LOCATION: "${RELEASE}-pingfederate-cluster.${K8S_NAMESPACE}.svc.cluster.local,${RELEASE}-pingfederate.eu.internal.ping-cluster.com"
     OPERATIONAL_MODE: CLUSTERED_CONSOLE
 #   enabled: true
 #   # container:
@@ -28,7 +28,7 @@ pingfederate-admin:
 # #############################################################
 pingfederate-engine:
   envs:
-    DNS_QUERY_LOCATION: "${RELEASE}-pingfederate-admin-cluster.ping.svc.cluster.local,${RELEASE}-pingfederate.eu.internal.ping-cluster.com"
+    DNS_QUERY_LOCATION: "${RELEASE}-pingfederate-cluster.${K8S_NAMESPACE}.svc.cluster.local,${RELEASE}-pingfederate.eu.internal.ping-cluster.com"
 #   enabled: true
 #   image:
 #     repository: pingidentity
