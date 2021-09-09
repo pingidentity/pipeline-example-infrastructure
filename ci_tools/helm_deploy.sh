@@ -54,20 +54,18 @@ for D in ./profiles/* ; do
   fi
 done
 
-## DELETE ONCE VAULT IS WORKING
-## Getting Client ID+Secret for this app.
-getPfClientAppInfo
-
-VALUES_FILE=${VALUES_FILE:=k8s/values.yaml}
-VALUES_DEV_FILE=${VALUES_DEV_FILE:=k8s/values.dev.yaml}
-test -n "${K8S_CLUSTER}" && VALUES_REGION_FILE="k8s/@values.${K8S_CLUSTER}.yaml"
-
 ## envsubst all the things
 export RELEASE
 expandFiles "${K8S_DIR}"
-if test "${K8S_NAMESPACE}" = "${DEV_NAMESPACE}" ; then
-  _valuesDevFile="-f ${VALUES_DEV_FILE}"
-fi
+
+VALUES_FILE=${VALUES_FILE:=k8s/values.yaml}
+VALUES_DEV_FILE=${VALUES_DEV_FILE:=k8s/values.dev.yaml}
+VALUES_REGION_FILE="k8s/values.${K8S_CLUSTER}.yaml"
+test "${K8S_NAMESPACE}" = "${DEV_NAMESPACE}" && _valuesDevFile="-f ${VALUES_DEV_FILE}"
+
+## DELETE ONCE VAULT IS WORKING
+## Getting Client ID+Secret for this app.
+getPfClientAppInfo
 
 ## Deploy any relevant k8s manifests
 applyManifests "${MANIFEST_DIR}/splunk-config" "${K8S_SECRETS_DIR}" $_dryRun
@@ -86,7 +84,7 @@ helm upgrade --install \
   --set pingfederate-engine.envs.PF_PROFILE_SHA="${pingfederateSha}" \
   --set global.envs.SERVER_PROFILE_BRANCH="${REF}" \
   --set global.envs.SERVER_PROFILE_BASE_BRANCH="${REF}" \
-  -f "${VALUES_FILE}" ${_valuesDevFile} \
+  -f "${VALUES_FILE}" -f "${VALUES_REGION_FILE}" ${_valuesDevFile}  \
   --namespace "${K8S_NAMESPACE}" --version "${CHART_VERSION}" $_dryRun
 
 if test -z $_dryRun ; then 
