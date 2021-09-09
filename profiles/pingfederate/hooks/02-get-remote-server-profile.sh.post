@@ -1,0 +1,23 @@
+#!/usr/bin/env sh
+
+${VERBOSE} && set -x
+
+_localIp="$(hostname -i)"
+echo "INFO: waiting for ip to resolve from ${DNS_QUERY_LOCATION}"
+count=0
+IFS=,
+while test $count -lt 3 ; do
+  sleep 5
+  for location in ${DNS_QUERY_LOCATION} ; do
+  getent ahosts "${location}" | awk '{print $1}' | sort -u | grep "$(hostname -i)"
+  test $? -eq 0 && found=true
+  done
+  if test $found ; then
+    count=$(( count+1 ))
+  else
+    count=0
+  fi
+  unset found
+done 
+unset IFS
+echo "INFO: successfully $(hostname -i) resolves from ${DNS_QUERY_LOCATION}"
