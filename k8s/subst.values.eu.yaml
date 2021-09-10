@@ -7,6 +7,9 @@
 # # pingfederate-admin values
 # #############################################################
 pingfederate-admin:
+  ## TODO: turn vault on once available in EU
+  vault:
+    enabled: false
   envs:
     DNS_QUERY_LOCATION: "${RELEASE}-pingfederate-cluster.${K8S_NAMESPACE}.svc.cluster.local,${RELEASE}-pingfederate.us.internal.ping-cluster.com"
     OPERATIONAL_MODE: CLUSTERED_ENGINE
