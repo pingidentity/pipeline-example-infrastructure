@@ -30,6 +30,8 @@ pingfederate-admin:
 # # pingfederate-engine values
 # #############################################################
 pingfederate-engine:
+  container:
+    waitFor: null
   envs:
     DNS_QUERY_LOCATION: "${RELEASE}-pingfederate-cluster.${K8S_NAMESPACE}.svc.cluster.local,${RELEASE}-pingfederate.eu.internal.ping-cluster.com"
 #   enabled: true
