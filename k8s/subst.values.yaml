@@ -40,30 +40,26 @@ global:
       runAsGroup: null
     nodeSelector:
       alpha.eksctl.io/nodegroup-name: base-r5-xlarge-1-20
-
-  #   secrets:
-  #     {secret-name}:
-  #       {secret-key | to-json}:
-  #         path: /opt/in/some/location/secrets
-  #         file: devops-secret.env
-  vault:
-    enabled: true
-    hashicorp:
-      # serviceAccountName: vault-auth
-      annotations:
-        agent-inject: true
-        agent-init-first: true
-        agent-pre-populate-only: true
-        log-level: info
-        preserve-secret-case: true
-        role: ${VAULT_AUTH_ROLE}
-        secret-volume-path: /run/secrets
-        serviceAccountName: vault-auth
-      secretPrefix: secret/samirgandhi@pingidentity.com/${K8S_NAMESPACE}/
-      secrets:
-        devops-secret.env:
-          to-json:
-            file: devops-secret.env
+  ## TODO: Turned off until vault is back on in EU. 
+  ## TODO: remove devops secret from namespaces. 
+  # vault:
+  #   enabled: true
+  #   hashicorp:
+  #     # serviceAccountName: vault-auth
+  #     annotations:
+  #       agent-inject: true
+  #       agent-init-first: true
+  #       agent-pre-populate-only: true
+  #       log-level: info
+  #       preserve-secret-case: true
+  #       role: ${VAULT_AUTH_ROLE}
+  #       secret-volume-path: /run/secrets
+  #       serviceAccountName: vault-auth
+  #     secretPrefix: secret/samirgandhi@pingidentity.com/${K8S_NAMESPACE}/
+  #     secrets:
+  #       devops-secret.env:
+  #         to-json:
+  #           file: devops-secret.env
   envs:
     PING_IDENTITY_ACCEPT_EULA: "YES"
     # need this because it's part of config, but not
@@ -88,9 +84,9 @@ pingfederate-admin:
         serviceAccountName: vault-auth
       secretPrefix: secret/samirgandhi@pingidentity.com/${K8S_NAMESPACE}/
       secrets:
-        devops-secret.env:
-          to-json:
-            file: devops-secret.env
+        # devops-secret.env:
+        #   to-json:
+        #     file: devops-secret.env
         pf-keys.env:
           to-json:
             file: pf-keys.env
