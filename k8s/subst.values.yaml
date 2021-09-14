@@ -28,7 +28,7 @@ global:
   image:
     repository: pingidentity
     name:
-    tag: 2107
+    tag: 2108
     pullPolicy: IfNotPresent
   license:
     secret:
@@ -104,6 +104,10 @@ pingfederate-admin:
     pf-master-key:
       items:
         pf.jwk: /opt/in/instance/server/default/data/pf.jwk
+    ## TODO: Remove once vault is added to eu
+    pf-secret-vars:
+      items:
+        env_vars: /opt/in/env_vars
   envs:
     PF_CONSOLE_AUTHENTICATION: OIDC
     PF_ADMIN_API_AUTHENTICATION: NATIVE

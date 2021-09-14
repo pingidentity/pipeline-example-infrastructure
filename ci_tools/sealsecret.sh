@@ -3,15 +3,10 @@
 test -z "${REF}" && REF=$(git rev-parse --abbrev-ref HEAD)
 set -a
 set -e
-# shellcheck source=@localSecrets
-test -f ./ci_tools/@localSecrets && . ./ci_tools/@localSecrets
-# shellcheck source=./ci_tools.lib.sh
-. ./ci_tools/ci_tools.lib.sh
 
 # set -x
 _initialDir="${PWD}"
 _scriptDir="${PWD}/ci_tools"
-k8sNamespace="${K8S_NAMESPACE}"
 # k8sNamespace="${K8S_NAMESPACE}"
 # cd "${_scriptDir}" || exit
 
@@ -28,6 +23,8 @@ Usage:  {options}
         file to encrypt
     -s
         secret resource name
+    -v
+        verbose
 END_USAGE
 exit 99
 }
@@ -50,6 +47,12 @@ while ! test -z ${1} ; do
       secretName="${1}";;
     -v)
       set -x;;
+    -n)
+      shift 
+      K8S_NAMESPACE="${1}";;
+    -c)
+      shift 
+      K8S_CLUSTER="${1}";;
     -h|--help)
       exit_usage "./sealsecret.sh -n cicd-dev -f full/path/to/Pingdirectory.lic -s pingdirectory-license
                    ";;
@@ -58,6 +61,11 @@ while ! test -z ${1} ; do
   esac
   shift
 done
+
+# shellcheck source=@localSecrets
+test -f ./ci_tools/@localSecrets && . ./ci_tools/@localSecrets
+# shellcheck source=./ci_tools.lib.sh
+. ./ci_tools/ci_tools.lib.sh
 
 if test -z "${inputFile}"; then
   exit_usage
