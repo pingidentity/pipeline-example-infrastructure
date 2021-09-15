@@ -118,7 +118,7 @@ if test -z $_dryRun ; then
       sleep 4
     else 
       crashingPods=$(kubectl get pods -l app.kubernetes.io/instance="${RELEASE}" -n "${K8S_NAMESPACE}" -o go-template='{{range $index, $element := .items}}{{range .status.containerStatuses}}{{if gt .restartCount 2 }}{{$element.metadata.name}}{{"\n"}}{{end}}{{end}}{{end}}')
-      numCrashing=$(wc -c < "${crashingPods}")
+      numCrashing=$(echo "${crashingPods}" |wc -c)
       if test $numCrashing -gt 5 ; then
         echo "ERROR: Found pods crashing $crashingPods"
         _timeoutElapsed=$(( _timeout+1 ))
