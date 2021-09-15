@@ -101,14 +101,16 @@ if test -z $_dryRun ; then
     ## If pd change give a lot of time
     export _pdName="${RELEASE}-pingdirectory"
     if test $(yq e '.* | select(.metadata.name == env(_pdName)) | .spec.template.metadata.annotations' tmp/helmdiff.yaml | grep -c checksum/config) -ne 0 ; then
-      _timeout=1800
+      _timeout=3600
     fi
   else
-    _timeout=900
+    ##TODO:tune this for an efficient startup
+    _timeout=3600
   fi
 
   _timeoutElapsed=0
   readyCount=0
+  ## watch helm release
   while test ${_timeoutElapsed} -lt ${_timeout} ; do
     sleep 6
     if test $(kubectl get pods -l app.kubernetes.io/instance="${RELEASE}" -n "${K8S_NAMESPACE}" -o go-template='{{range $index, $element := .items}}{{range .status.containerStatuses}}{{if not .ready}}{{$element.metadata.name}}{{"\n"}}{{end}}{{end}}{{end}}' | wc -l ) = 0 ; then
@@ -116,21 +118,25 @@ if test -z $_dryRun ; then
       sleep 4
     else 
       crashingPods=$(kubectl get pods -l app.kubernetes.io/instance="${RELEASE}" -n "${K8S_NAMESPACE}" -o go-template='{{range $index, $element := .items}}{{range .status.containerStatuses}}{{if gt .restartCount 2 }}{{$element.metadata.name}}{{"\n"}}{{end}}{{end}}{{end}}')
-      numCrashing=$(echo $crashingPods | wc -c)
+      numCrashing=$(wc -c < "${crashingPods}")
       if test $numCrashing -gt 5 ; then
         echo "ERROR: Found pods crashing $crashingPods"
         _timeoutElapsed=$(( _timeout+1 ))
       fi
     fi
+    if test ${readyCount} -ge 3 ; then
+      echo "INFO: Successfully Deployed."
+      exit 0
+    fi
     _timeoutElapsed=$((_timeoutElapsed+6))
-    test ${readyCount} -ge 3 && break
   done
 
-  ## run helm diff to show what will change to help identify errors
-  if test "${?}" -ne 0 ; then
-    ## helm diff to see what changed and could have cause error.
+  ## Getting this far is an error
+  ## show what changed to help identify errors
+  if test ${_timeoutElapsed} -ge ${_timeout} ; then
     cat tmp/helmdiff.txt
-    echo "ERROR when deploying release"
+    test ${_timeoutElapsed} -ge ${_timeout} && echo "ERROR: timed our waiting for deployment" 
+    echo "ERROR: when deploying release"
     exit 1
   fi
 fi
