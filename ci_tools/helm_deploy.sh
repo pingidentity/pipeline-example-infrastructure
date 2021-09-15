@@ -101,11 +101,11 @@ if test -z $_dryRun ; then
     ## If pd change give a lot of time
     export _pdName="${RELEASE}-pingdirectory"
     if test $(yq e '.* | select(.metadata.name == env(_pdName)) | .spec.template.metadata.annotations' tmp/helmdiff.yaml | grep -c checksum/config) -ne 0 ; then
-      _timeout=2400
+      _timeout=3600
     fi
   else
     ##TODO:tune this for an efficient startup
-    _timeout=2400
+    _timeout=3600
   fi
 
   _timeoutElapsed=0
