@@ -253,6 +253,10 @@ pingfederate-engine:
 # pingdirectory values
 #############################################################
 pingdirectory:
+  image: 
+    repository: 574076504146.dkr.ecr.us-west-2.amazonaws.com/docker-builds
+    name: pingdirectory
+    tag: 8.3.0.1-alpine_3.14-az11-GDO-931-60afc513-x86_64
   enabled: true
   envs:
     SERVER_PROFILE_PATH: profiles/pingdirectory
