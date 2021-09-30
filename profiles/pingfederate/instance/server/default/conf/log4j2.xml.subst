@@ -18,6 +18,8 @@
    | If the log4j2.xml has been customized, the custom settings will be preserved on upgrade.
 -->
 
+
+
 <!--
    | Due to a bug in Log4J2, there will a message "ERROR appender <Failover-Appender> has no parameter that matches element Failovers" upon startup
    | if Failover Appenders are enabled.  The failover appenders are configured correctly and are functional. Please disregard the error message.
