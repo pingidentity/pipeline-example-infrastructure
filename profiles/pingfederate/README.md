@@ -6,3 +6,6 @@ These files are laid over a vanilla installation of pingfederate
 ## Credentials
 User: Administrator
 Password: 2FederateM0re ( that's a zero numeral, not uppercase O )
+
+
+some new line
