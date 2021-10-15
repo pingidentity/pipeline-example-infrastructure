@@ -415,13 +415,7 @@
         },
         {
             "operationType": "SAVE",
-            "items": [{
-                "dataStoreRef": {
-                    "location": "https://localhost:-1/pf-admin-api/v1/dataStores",
-                    "id": ""
-                },
-                "synchronizationFrequency": 60
-            }],
+            "items": [{"synchronizationFrequency": 60}],
             "resourceType": "/serverSettings/outboundProvisioning"
         },
         {
@@ -429,10 +423,10 @@
             "items": [{
                 "password": "${PING_IDENTITY_PASSWORD}",
                 "roles": [
-                    "EXPRESSION_ADMINISTRATOR",
-                    "CRYPTO_ADMINISTRATOR",
                     "ADMINISTRATOR",
-                    "USER_ADMINISTRATOR"
+                    "CRYPTO_ADMINISTRATOR",
+                    "USER_ADMINISTRATOR",
+                    "EXPRESSION_ADMINISTRATOR"
                 ],
                 "auditor": false,
                 "description": "Initial administrator user.",
@@ -1445,76 +1439,6 @@
                     "entityId": "docker",
                     "loggingMode": "STANDARD",
                     "id": "IENFjGICXt3YsBKNxHSzkN28LWg",
-                    "type": "SP",
-                    "connectionTargetType": "STANDARD"
-                },
-                {
-                    "contactInfo": {},
-                    "virtualEntityIds": [],
-                    "credentials": {
-                        "certs": [],
-                        "signingSettings": {
-                            "signingKeyPairRef": {
-                                "location": "https://localhost:-1/pf-admin-api/v1/keyPairs/signing/devsigningcert",
-                                "id": "devsigningcert"
-                            },
-                            "includeRawKeyInSignature": false,
-                            "includeCertInSignature": false,
-                            "algorithm": "SHA256withRSA"
-                        }
-                    },
-                    "name": "https://example.com",
-                    "active": true,
-                    "spBrowserSso": {
-                        "protocol": "SAML20",
-                        "requireSignedAuthnRequests": false,
-                        "spSamlIdentityMapping": "STANDARD",
-                        "signAssertions": false,
-                        "authenticationPolicyContractAssertionMappings": [{
-                            "abortSsoTransactionAsFailSafe": false,
-                            "authenticationPolicyContractRef": {
-                                "location": "https://localhost:-1/pf-admin-api/v1/authenticationPolicyContracts/Zxp6N6W5PH9onACT",
-                                "id": "Zxp6N6W5PH9onACT"
-                            },
-                            "restrictedVirtualEntityIds": [],
-                            "attributeContractFulfillment": {"SAML_SUBJECT": {
-                                "source": {"type": "AUTHENTICATION_POLICY_CONTRACT"},
-                                "value": "subject"
-                            }},
-                            "restrictVirtualEntityIds": false,
-                            "attributeSources": [],
-                            "issuanceCriteria": {"conditionalCriteria": []}
-                        }],
-                        "encryptionPolicy": {
-                            "encryptSloSubjectNameId": false,
-                            "encryptAssertion": false,
-                            "encryptedAttributes": [],
-                            "sloSubjectNameIDEncrypted": false
-                        },
-                        "enabledProfiles": ["IDP_INITIATED_SSO"],
-                        "signResponseAsRequired": true,
-                        "ssoServiceEndpoints": [{
-                            "isDefault": true,
-                            "binding": "POST",
-                            "index": 0,
-                            "url": "https://example.com"
-                        }],
-                        "adapterMappings": [],
-                        "assertionLifetime": {
-                            "minutesAfter": 5,
-                            "minutesBefore": 5
-                        },
-                        "attributeContract": {
-                            "coreAttributes": [{
-                                "nameFormat": "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified",
-                                "name": "SAML_SUBJECT"
-                            }],
-                            "extendedAttributes": []
-                        }
-                    },
-                    "entityId": "https://example.com",
-                    "loggingMode": "STANDARD",
-                    "id": "V8CWyjlXVGHRcq87HR61v__YBpM",
                     "type": "SP",
                     "connectionTargetType": "STANDARD"
                 },
