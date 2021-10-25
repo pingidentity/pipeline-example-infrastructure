@@ -29,7 +29,7 @@ global:
     repository: pingidentity
     name:
     tag: edge
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
   license:
     secret:
       devOps: devops-secret
