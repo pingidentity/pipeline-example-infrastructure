@@ -28,7 +28,7 @@ global:
   image:
     repository: pingidentity
     name:
-    tag: 2109
+    tag: edge
     pullPolicy: IfNotPresent
   license:
     secret:
