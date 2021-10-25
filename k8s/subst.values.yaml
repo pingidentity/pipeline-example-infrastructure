@@ -141,6 +141,7 @@ pingfederate-admin:
     # don't have auditor and admin
     PF_OIDC_ROLE_AUDITOR: roleAuditor
     TAIL_LOG_FILES: "/opt/logs/server.log /opt/logs/splunk-audit.log"
+    FOO: "BAR"
   services:
     https:
       servicePort: 9999
