@@ -1,0 +1,65 @@
+
+on:
+  push:
+    paths-ignore:
+      - '**.md'
+
+name: Deploy Environment
+
+jobs:
+  deploy:
+    name: Deploy
+    # uses hosted runner
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.commits[0].message, '[skip ci]')"
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Install Dependencies
+      run: |
+        curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl"
+        chmod +x ./kubectl
+        sudo mv ./kubectl /usr/local/bin/kubectl
+        mkdir ${HOME}/.kube
+        echo "${{ secrets.KUBECONFIG_YAML }}" | base64 --decode > ${HOME}/.kube/config
+        kubectl version
+        curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
+        chmod 700 get_helm.sh
+        ./get_helm.sh
+        helm repo add pingidentity https://helm.pingidentity.com/
+    
+    - name: Deploy
+      run: |
+        echo $GITHUB_REF
+        export REF=$(echo $GITHUB_REF | sed -e "s#refs/heads/##g")
+        sh scripts/deploy.sh
+      # env:
+      #   PING_IDENTITY_DEVOPS_USER_BASE64: ${{ secrets.PING_IDENTITY_DEVOPS_USER_BASE64 }}
+      #   PING_IDENTITY_DEVOPS_KEY_BASE64: ${{ secrets.PING_IDENTITY_DEVOPS_KEY_BASE64 }}
+    # - name: Integration Test
+    #   run: scripts/run_postman.sh iac/integrationtest.yaml
+    # - name: Environment Info
+    #   env:
+    #     SLACK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+    #   if: "!contains(github.event.commits[0].message, '[skip notif]')"
+    #   run: |
+    #     echo "Your environment is ready, check Slack!"
+    #     set -a
+    #     source scripts/scripts.lib.sh
+    #     tmpHosts="$(kubectl get ing -o=jsonpath='{.items[*].spec.rules[*].host}')"
+    #     for i in $tmpHosts ; do INGRESS_HOSTS="$INGRESS_HOSTS $i \\n"; done
+    #     curl -X POST -H 'Content-type: application/json' --data '{"text":"BXH - :rocket: Successfully Deployed! Check out new hosts:\n'"$INGRESS_HOSTS"'"}' "${SLACK_URL}"
+    #     # curl -X POST -H 'Content-type: application/json' --data '{"text":"BXH - ENV is ready!"}' "${SLACK_URL}"
+    # - name: Report Failure
+    #   env:
+    #     SLACK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+    #   run: |
+    #     echo "Deployment Failed, check slack."
+    #     set -a
+    #     source scripts/scripts.lib.sh
+    #     curl -X POST -H 'Content-type: application/json' --data '{"text":"BXH - sad trombone :dockerfail: deployment failed see https://github.com/Technical-Enablement-PingIdentity/BXHealth-ServerProfiles/actions/runs/'"$GITHUB_RUN_ID"'"}' "${SLACK_URL}"
+    #   if: ${{ failure() }}
