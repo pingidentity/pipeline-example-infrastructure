@@ -40,26 +40,3 @@ jobs:
       # env:
       #   PING_IDENTITY_DEVOPS_USER_BASE64: ${{ secrets.PING_IDENTITY_DEVOPS_USER_BASE64 }}
       #   PING_IDENTITY_DEVOPS_KEY_BASE64: ${{ secrets.PING_IDENTITY_DEVOPS_KEY_BASE64 }}
-    # - name: Integration Test
-    #   run: scripts/run_postman.sh iac/integrationtest.yaml
-    # - name: Environment Info
-    #   env:
-    #     SLACK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-    #   if: "!contains(github.event.commits[0].message, '[skip notif]')"
-    #   run: |
-    #     echo "Your environment is ready, check Slack!"
-    #     set -a
-    #     source scripts/scripts.lib.sh
-    #     tmpHosts="$(kubectl get ing -o=jsonpath='{.items[*].spec.rules[*].host}')"
-    #     for i in $tmpHosts ; do INGRESS_HOSTS="$INGRESS_HOSTS $i \\n"; done
-    #     curl -X POST -H 'Content-type: application/json' --data '{"text":"BXH - :rocket: Successfully Deployed! Check out new hosts:\n'"$INGRESS_HOSTS"'"}' "${SLACK_URL}"
-    #     # curl -X POST -H 'Content-type: application/json' --data '{"text":"BXH - ENV is ready!"}' "${SLACK_URL}"
-    # - name: Report Failure
-    #   env:
-    #     SLACK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-    #   run: |
-    #     echo "Deployment Failed, check slack."
-    #     set -a
-    #     source scripts/scripts.lib.sh
-    #     curl -X POST -H 'Content-type: application/json' --data '{"text":"BXH - sad trombone :dockerfail: deployment failed see https://github.com/Technical-Enablement-PingIdentity/BXHealth-ServerProfiles/actions/runs/'"$GITHUB_RUN_ID"'"}' "${SLACK_URL}"
-    #   if: ${{ failure() }}
