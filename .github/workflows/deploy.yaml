@@ -21,12 +21,14 @@ jobs:
 
     - name: Install Dependencies
       run: |
+        ## Install and configure kubectl
         curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl"
         chmod +x ./kubectl
         sudo mv ./kubectl /usr/local/bin/kubectl
         mkdir ${HOME}/.kube
         echo "${{ secrets.KUBECONFIG_YAML }}" | base64 --decode > ${HOME}/.kube/config
         kubectl version
+        ## Install and configure helm
         curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
         chmod 700 get_helm.sh
         ./get_helm.sh
@@ -34,9 +36,11 @@ jobs:
     
     - name: Deploy
       run: |
-        echo $GITHUB_REF
+        # Determine if prod deploy
         export REF=$(echo $GITHUB_REF | sed -e "s#refs/heads/##g")
+        test ${GITHUB_REF} != ${GITHUB_REF##refs/tags} && export REF=prod
+        # Deploy
         sh scripts/deploy.sh
-      # env:
-      #   PING_IDENTITY_DEVOPS_USER_BASE64: ${{ secrets.PING_IDENTITY_DEVOPS_USER_BASE64 }}
-      #   PING_IDENTITY_DEVOPS_KEY_BASE64: ${{ secrets.PING_IDENTITY_DEVOPS_KEY_BASE64 }}
+      env:
+        PING_IDENTITY_DEVOPS_USER_BASE64: ${{ secrets.PING_IDENTITY_DEVOPS_USER_BASE64 }}
+        PING_IDENTITY_DEVOPS_KEY_BASE64: ${{ secrets.PING_IDENTITY_DEVOPS_KEY_BASE64 }}
