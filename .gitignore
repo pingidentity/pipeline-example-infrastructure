@@ -1,7 +1,10 @@
 @*
-*.final
+# *.final
 *.DS_Store
-values.*yaml
-splunk-config-init.yaml
+values.dev.yaml
 values.yaml
-tmp*
+local-secrets.sh
+tmp
+# splunk-config-init.yaml
+# values.yaml
+# tmp*

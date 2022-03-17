@@ -1,24 +1,22 @@
-
 on:
-  push:
-    paths-ignore:
-      - '**.md'
+  delete:
+    branches-ignore:
+      - qa
+      - main
+      - master
 
-name: Deploy Environment
+name: DeleteEnv
 
 jobs:
   deploy:
     name: Deploy
-    # uses hosted runner
     runs-on: ubuntu-latest
-    if: "!contains(github.event.commits[0].message, '[skip ci]')"
 
     steps:
     - name: Checkout
       uses: actions/checkout@v2
       with:
         fetch-depth: 0
-
     - name: Install Dependencies
       run: |
         ## Install and configure kubectl
@@ -38,10 +36,6 @@ jobs:
         sudo add-apt-repository ppa:rmescandon/yq
         sudo apt update
         sudo apt install yq -y
-    - name: Deploy
-      run: |
-        # Deploy
-        sh scripts/deploy.sh
-      env:
-        PING_IDENTITY_DEVOPS_USER_BASE64: ${{ secrets.PING_IDENTITY_DEVOPS_USER_BASE64 }}
-        PING_IDENTITY_DEVOPS_KEY_BASE64: ${{ secrets.PING_IDENTITY_DEVOPS_KEY_BASE64 }}
+
+    - name: Cleanup Feature K8S Env
+      run: sh scripts/prune.sh --heavy

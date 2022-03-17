@@ -1,8 +1,5 @@
 #!/usr/bin/env sh
 CWD=$(dirname "$0")
-. "${CWD}/lib.sh"
-
-echo "${GITHUB_REF}"
 
 ## Friendly script info
 usage ()
@@ -38,18 +35,107 @@ while ! test -z ${1} ; do
   shift
 done
 
-## builds sha for each product based on the folder name in ./profiles/* (e.g. pingfederateSha)
-  ## this determines what will be redeployed. 
+# Source global functions and variables
+. "${CWD}/lib.sh"
+
+# builds sha for each product based on the folder name in ./profiles/* (e.g. pingfederateSha)
+#   this determines what will be rolled. 
 for D in ./profiles/* ; do 
   if [ -d "${D}" ]; then 
-    _prodName=$(basename "${D}" | sed 's/-//')
+    _prodName=$(basename "${D}" | sed 's/-/_/' | tr '[:lower:]' '[:upper:]')
     dirr="${D}"
-    eval "${_prodName}Sha=x$(git log -n 1 --pretty=format:%h -- "$dirr")"
+    set -a
+    eval "${_prodName}_SHA=sha-$(git log -n 1 --pretty=format:%h -- "$dirr")"
+    set +a
   fi
 done
 
-## Turn .subst files to hardcoded
-expandFiles "helm"
+# Convert .subst files to hardcoded files for deployment
+envsubstFiles "helm" "manifest"
 
-## Finish by cleaning up hardcoded files if not a dry-run
+# START: Deploy
+
+## Apply all evaluated kubernetes manifest files
+find "manifest" -type f -regex ".*yaml$" >> k8stmp
+while IFS= read -r k8sFile; do
+  kubectl apply -f "$k8sFile" $_dryRun -o yaml
+done < k8stmp
+test -z "${_dryRun}" && rm k8stmp
+
+## Identify possible values.yaml files
+VALUES_FILE=${VALUES_FILE:=helm/values.yaml}
+VALUES_DEV_FILE=${VALUES_DEV_FILE:=helm/values.dev.yaml}
+test "${REF}" != "prod" && _valuesDevFile="-f ${VALUES_DEV_FILE}"
+
+## Before deployment, check if previous failures need to be cleaned up
+crashingPods=$(kubectl get pods -l app.kubernetes.io/instance="${REF}" -n "${K8S_NAMESPACE}" -o go-template='{{range $index, $element := .items}}{{range .status.containerStatuses}}{{if gt .restartCount 2 }}{{$element.metadata.name}}{{"\n"}}{{end}}{{end}}{{end}}')
+for i in $crashingPods
+do
+    _resourceType=$(kubectl get pod $i -o=jsonpath='{.metadata.ownerReferences[0].kind}')
+    _ownerName=$(kubectl get pod $i -o=jsonpath='{.metadata.ownerReferences[0].name}')
+    if test "$_resourceType" = "ReplicaSet" ; then
+      _resourceType=deployment
+      _ownerName=$(echo "${_ownerName}" | rev | cut -f2- -d"-" | rev)
+    else
+      _resourceType=statefulset
+    fi
+      kubectl scale "$_resourceType" "$_ownerName" --replicas=0
+done
+
+## Helm Deploy
+helm upgrade --install \
+  "${REF}" pingidentity/ping-devops \
+  -f "${VALUES_FILE}" ${_valuesDevFile}  \
+  --version "${CHART_VERSION}" $_dryRun
+
+# Finish by cleaning up hardcoded files if not a dry-run
 test -z "${_dryRun}" && cleanExpandedFiles
+
+# END: Deploy
+
+# START: Watch Deployment Health
+
+if test -z $_dryRun ; then 
+  ## Set to maximum time for a successful deploy
+  _timeout=3600
+  _timeoutElapsed=0
+  _readyCount=0
+
+  ## Collect previous helm release info to show in case of failure
+  revCurrent=$(helm ls --filter "${REF}" -o json | jq -r '.[0].revision')
+  revPrevious=$(( revCurrent-1 ))
+  test ! -d tmp && mkdir tmp
+  helm diff revision "${REF}" $revCurrent $revPrevious --no-color > tmp/helmdiff.txt
+
+  ## Watch helm release for pods going to crashloop
+  while test ${_timeoutElapsed} -lt ${_timeout} ; do
+    sleep 6
+    if test $(kubectl get pods -l app.kubernetes.io/instance="${REF}" -n "${K8S_NAMESPACE}" -o go-template='{{range $index, $element := .items}}{{range .status.containerStatuses}}{{if not .ready}}{{$element.metadata.name}}{{"\n"}}{{end}}{{end}}{{end}}' | wc -l ) = 0 ; then
+      _readyCount=$(( _readyCount+1 ))
+      sleep 4
+    else 
+      crashingPods=$(kubectl get pods -l app.kubernetes.io/instance="${REF}" -n "${K8S_NAMESPACE}" -o go-template='{{range $index, $element := .items}}{{range .status.containerStatuses}}{{if gt .restartCount 2 }}{{$element.metadata.name}}{{"\n"}}{{end}}{{end}}{{end}}')
+      numCrashing=$(echo "${crashingPods}" |wc -c)
+      if test $numCrashing -gt 5 ; then
+        echo "ERROR: Found pods crashing"
+        echo "$crashingPods"
+        _timeoutElapsed=$(( _timeout+1 ))
+      fi
+    fi
+    if test ${_readyCount} -ge 3 ; then
+      echo "INFO: Successfully Deployed."
+      exit 0
+    fi
+    _timeoutElapsed=$((_timeoutElapsed+6))
+  done
+
+  ## Getting this far is an error
+  ## show what changed to help identify errors
+  if test ${_timeoutElapsed} -ge ${_timeout} ; then
+
+    cat tmp/helmdiff.txt
+    set +x
+    echo "ERROR: when deploying release"
+    exit 1
+  fi
+fi
