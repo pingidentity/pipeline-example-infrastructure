@@ -13,7 +13,6 @@ if test -z "${GITHUB_REPOSITORY}"; then
   GITHUB_REPOSITORY="${GITHUB_REPOSITORY##https://github.com/}"
   GITHUB_REF=$(git rev-parse --abbrev-ref HEAD)
   REF="${GITHUB_REF}"
-  ls
   # shellcheck source=local-secrets.sh
   . "scripts/local-secrets.sh"
 fi
@@ -43,7 +42,7 @@ esac
 set +a
 # End: Set all Global script variables
 
-
+echo "${REF}"
 getGlobalVars() {
   kubectl get cm "${REF}-global-env-vars" -o=jsonpath='{.data}' | jq -r '. | to_entries | .[] | .key + "=" + .value + ""'
 }
