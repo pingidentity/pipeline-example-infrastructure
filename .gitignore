@@ -4,7 +4,10 @@
 values.dev.yaml
 values.yaml
 local-secrets.sh
+devops-secret.yaml
 tmp
+expandedFiles
+k8stmp
 # splunk-config-init.yaml
 # values.yaml
 # tmp*

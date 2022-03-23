@@ -7,7 +7,7 @@
 global:
   ingress:
     enabled: true
-    addReleaseNameToHost: prefix
+    addReleaseNameToHost: prepend
     defaultDomain: "ping-devops.com"
     defaultTlsSecret:
     annotations:
@@ -36,14 +36,14 @@ pingaccess-admin:
     # <PRODUCT>_PROFILE_SHA is used to trigger a rolling update of the product
     #   SHA is based on git history of the profiles folder.
     PA_ADMIN_PROFILE_SHA: "${PINGACCESS_ADMIN_SHA}"
-    PA_ENGINE_PROFILE_SHA: "${PINGACCES_ENGINE_SHA}"
+    PA_ENGINE_PROFILE_SHA: "${PINGACCESS_ENGINE_SHA}"
 
 pingaccess-engine:
   enabled: true
   envs:
     SERVER_PROFILE_PATH: profiles/pingaccess-engine
     SERVER_PROFILE_BRANCH: "${TAG}"
-    PA_ENGINE_PROFILE_SHA: "${PINGACCES_ENGINE_SHA}"
+    PA_ENGINE_PROFILE_SHA: "${PINGACCESS_ENGINE_SHA}"
   # For products where more than 1 instance may be desired, the replicaCount option is included
   container:
     replicaCount: 1
