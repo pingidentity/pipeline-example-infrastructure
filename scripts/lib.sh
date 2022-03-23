@@ -28,7 +28,7 @@ test -z ${REF} \
 ### This pattern will match if the workflow trigger is a tag
 test "${GITHUB_REF}" != "${GITHUB_REF##refs/tags}" \
   && REF=prod \
-  && TAG="${GITHUB_REF##refs/tags}"
+  && TAG="${GITHUB_REF##refs/tags/}"
 ### Environment specific variables
 case "${REF}" in
   prod )
