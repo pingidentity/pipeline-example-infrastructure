@@ -7,7 +7,7 @@
 global:
   ingress:
     enabled: true
-    addReleaseNameToHost: prefix
+    addReleaseNameToHost: prepend
     defaultDomain: "ping-devops.com"
     defaultTlsSecret:
     annotations:
