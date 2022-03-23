@@ -5,6 +5,7 @@
 
 # Settings to be applied to every product are defined under global
 global:
+  # TODO: find somewhere to show tag
   ingress:
     enabled: true
     addReleaseNameToHost: prepend
@@ -27,8 +28,7 @@ pingaccess-admin:
   envs:
     # PingAccess Admin Console will receive the admin and engine profile.
     SERVER_PROFILE_ADMIN_PATH: profiles/pingaccess-admin
-    # On the default values.yaml we expect to be on a release TAG for deployment
-    #   a dry-run on master will show branch as empty
+    # On the default values.yaml we use the repository default branch
     SERVER_PROFILE_PARENT: ADMIN
     SERVER_PROFILE_PATH: profiles/pingaccess-engine
     # <PRODUCT>_PROFILE_SHA is used to trigger a rolling update of the product

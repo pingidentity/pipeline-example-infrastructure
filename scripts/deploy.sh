@@ -75,7 +75,9 @@ helm upgrade --install \
 
 ## For Statefulsets that failed previously, the crashing pod is deleted to pick up new changes
 ##    this is per: https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#forced-rollback
+## Also, some crashing pods may not have been properly labeled previously.
 _podList=$(kubectl get pod --selector=crashloop=true -o jsonpath='{..metadata.name}')
+
 kubectl delete pod $(printf "%s " $_podList) --force --grace-period=0 "${_dryRun}"
 
 # Finish by cleaning up hardcoded files if not a dry-run
@@ -107,7 +109,7 @@ if test -z $_dryRun ; then
       _crashingPods=$(kubectl get pods -l app.kubernetes.io/instance="${REF}" -n "${K8S_NAMESPACE}" -o go-template='{{range $index, $element := .items}}{{range .status.containerStatuses}}{{if gt .restartCount 2 }}{{$element.metadata.name}}{{"\n"}}{{end}}{{end}}{{end}}')
       numCrashing=$(echo "${_crashingPods}" |wc -c)
       ## Recognize failed release via extended crashloop
-      if test $numCrashing -gt 3 ; then
+      if test $numCrashing -ge 3 ; then
         echo "${RED}ERROR: Found pods crashing. Adding label 'crashloop=true'"
         echo "${RED}$_crashingPods"
         for _pod in $_crashingPods
