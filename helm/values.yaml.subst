@@ -126,3 +126,7 @@ pingauthorize:
     PAZ_PROFILE_SHA: "${PINGAUTHORIZE_SHA}"
   container:
     replicaCount: 1
+    waitFor:
+      pingdirectory:
+        service: ldaps
+        timeoutSeconds: 600
