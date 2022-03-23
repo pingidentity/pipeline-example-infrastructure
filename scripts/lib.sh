@@ -21,23 +21,15 @@ fi
 test -z "${CHART_VERSION}" \
   && CHART_VERSION="0.8.6"
 
+export DEFAULT_BRANCH=prod
+
 ## Determine trigger
 ### This pattern will match if the workflow trigger is a branch
 test -z ${REF} \
   && REF=$(echo "${GITHUB_REF}" | sed -e "s#refs/heads/##g")
 ### This pattern will match if the workflow trigger is a tag
-test "${GITHUB_REF}" != "${GITHUB_REF##refs/tags}" \
-  && REF=prod \
-  && TAG="${GITHUB_REF##refs/tags/}"
-### Environment specific variables
-case "${REF}" in
-  prod )
-    FOO=prod
-    ;;
-  * )
-    FOO="${REF}"
-    ;;
-esac
+test "${GITHUB_REF}" != "${GITHUB_REF%%"${DEFAULT_BRANCH}"}" \
+  && REF=prod
 
 set +a
 # End: Set all Global script variables

@@ -5,6 +5,7 @@
 
 # Settings to be applied to every product are defined under global
 global:
+  # TODO: find somewhere to show tag
   ingress:
     enabled: true
     addReleaseNameToHost: prepend
@@ -27,12 +28,9 @@ pingaccess-admin:
   envs:
     # PingAccess Admin Console will receive the admin and engine profile.
     SERVER_PROFILE_ADMIN_PATH: profiles/pingaccess-admin
-    # On the default values.yaml we expect to be on a release TAG for deployment
-    #   a dry-run on master will show branch as empty
-    SERVER_PROFILE_ADMIN_BRANCH: "${TAG}"
+    # On the default values.yaml we use the repository default branch
     SERVER_PROFILE_PARENT: ADMIN
     SERVER_PROFILE_PATH: profiles/pingaccess-engine
-    SERVER_PROFILE_BRANCH: "${TAG}"
     # <PRODUCT>_PROFILE_SHA is used to trigger a rolling update of the product
     #   SHA is based on git history of the profiles folder.
     PA_ADMIN_PROFILE_SHA: "${PINGACCESS_ADMIN_SHA}"
@@ -42,7 +40,6 @@ pingaccess-engine:
   enabled: true
   envs:
     SERVER_PROFILE_PATH: profiles/pingaccess-engine
-    SERVER_PROFILE_BRANCH: "${TAG}"
     PA_ENGINE_PROFILE_SHA: "${PINGACCESS_ENGINE_SHA}"
   # For products where more than 1 instance may be desired, the replicaCount option is included
   container:
@@ -58,10 +55,9 @@ pingfederate-admin:
   enabled: true
   envs:
     SERVER_PROFILE_ADMIN_PATH: profiles/pingaccess-admin
-    SERVER_PROFILE_ADMIN_BRANCH: "${TAG}"
     SERVER_PROFILE_PARENT: ADMIN
     SERVER_PROFILE_PATH: profiles/pingaccess-engine
-    SERVER_PROFILE_BRANCH: "${TAG}"
+
     PF_ADMIN_PROFILE_SHA: "${PINGFEDERATE_ADMIN_SHA}"
     PF_ENGINE_PROFILE_SHA: "${PINGFEDERATE_ENGINE_SHA}"
   # pingfederate-admin is configured as a statefulset to match 
@@ -82,7 +78,6 @@ pingfederate-engine:
   enabled: true
   envs:
     SERVER_PROFILE_PATH: profiles/pingfederate-engine
-    SERVER_PROFILE_BRANCH: "${TAG}"
     PF_ENGINE_PROFILE_SHA: "${PINGFEDERATE_ENGINE_SHA}"
   container:
     replicaCount: 1
@@ -97,7 +92,6 @@ pingdirectory:
   enabled: true
   envs:
     SERVER_PROFILE_PATH: profiles/pingdirectory
-    SERVER_PROFILE_BRANCH: "${TAG}"
     PD_PROFILE_SHA: "${PINGDIRECTORY_SHA}"
   container:
     replicaCount: 1
@@ -115,14 +109,12 @@ pingdataconsole:
   enabled: true
   envs:
     SERVER_PROFILE_PATH: profiles/pingdataconsole
-    SERVER_PROFILE_BRANCH: "${TAG}"
     PDC_PROFILE_SHA: "${PINGDATACONSOLE_SHA}"
 
 pingauthorize:
   enabled: true
   envs:
     SERVER_PROFILE_PATH: profiles/pingauthorize
-    SERVER_PROFILE_BRANCH: "${TAG}"
     PAZ_PROFILE_SHA: "${PINGAUTHORIZE_SHA}"
   container:
     replicaCount: 1
