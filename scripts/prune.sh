@@ -7,7 +7,7 @@
 set -x
 env
 
-# shellcheck source=./ci_tools.lib.sh
+# shellcheck source=lib.sh
 . ./scripts/lib.sh
 
 helm uninstall "${REF}"

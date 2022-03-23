@@ -1,8 +1,10 @@
 
 on:
   push:
-    # paths-ignore:
-    #   - '**.md'
+    branches-ignore:
+      - main
+      - prod
+    
 
 name: Deploy Environment
 

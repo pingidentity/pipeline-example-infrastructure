@@ -15,8 +15,10 @@ global:
       kubernetes.io/ingress.class: "nginx-public"
   # Environment variables that should exist in every product are listed in global.envs
   envs:
-    SERVER_PROFILE_URL: "${SERVER_PROFILE_URL}"
-    SERVER_PROFILE_ADMIN_URL: "${SERVER_PROFILE_URL}"
+    ## CHANGEME - hardcode this line
+    SERVER_PROFILE_URL: "https://github.com/samir-gandhi/pingidentity-devops-reference-pipeline.git"
+    ## CHANGEME - hardcode this line
+    SERVER_PROFILE_ADMIN_URL: "https://github.com/samir-gandhi/pingidentity-devops-reference-pipeline.git"
 
 pingaccess-admin:
   privateCert:

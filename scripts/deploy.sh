@@ -67,26 +67,16 @@ VALUES_FILE=${VALUES_FILE:=helm/values.yaml}
 VALUES_DEV_FILE=${VALUES_DEV_FILE:=helm/values.dev.yaml}
 test "${REF}" != "prod" && _valuesDevFile="-f ${VALUES_DEV_FILE}"
 
-## Before deployment, check if previous failures need to be cleaned up
-crashingPods=$(kubectl get pods -l app.kubernetes.io/instance="${REF}" -n "${K8S_NAMESPACE}" -o go-template='{{range $index, $element := .items}}{{range .status.containerStatuses}}{{if gt .restartCount 2 }}{{$element.metadata.name}}{{"\n"}}{{end}}{{end}}{{end}}')
-for i in $crashingPods
-do
-    _resourceType=$(kubectl get pod $i -o=jsonpath='{.metadata.ownerReferences[0].kind}')
-    _ownerName=$(kubectl get pod $i -o=jsonpath='{.metadata.ownerReferences[0].name}')
-    if test "$_resourceType" = "ReplicaSet" ; then
-      _resourceType=deployment
-      _ownerName=$(echo "${_ownerName}" | rev | cut -f2- -d"-" | rev)
-    else
-      _resourceType=statefulset
-    fi
-      kubectl scale "$_resourceType" "$_ownerName" --replicas=0
-done
-
 ## Helm Deploy
 helm upgrade --install \
   "${REF}" pingidentity/ping-devops \
   -f "${VALUES_FILE}" ${_valuesDevFile}  \
   --version "${CHART_VERSION}" $_dryRun
+
+## For Statefulsets that failed previously, the crashing pod is deleted to pick up new changes
+##    this is per: https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#forced-rollback
+_podList=$(kubectl get pod --selector=crashloop=true -o jsonpath='{..metadata.name}')
+kubectl delete pod $(printf "%s " $_podList) --force --grace-period=0 "${_dryRun}"
 
 # Finish by cleaning up hardcoded files if not a dry-run
 test -z "${_dryRun}" && cleanExpandedFiles
@@ -114,11 +104,16 @@ if test -z $_dryRun ; then
       _readyCount=$(( _readyCount+1 ))
       sleep 4
     else 
-      crashingPods=$(kubectl get pods -l app.kubernetes.io/instance="${REF}" -n "${K8S_NAMESPACE}" -o go-template='{{range $index, $element := .items}}{{range .status.containerStatuses}}{{if gt .restartCount 2 }}{{$element.metadata.name}}{{"\n"}}{{end}}{{end}}{{end}}')
-      numCrashing=$(echo "${crashingPods}" |wc -c)
-      if test $numCrashing -gt 5 ; then
-        echo "ERROR: Found pods crashing"
-        echo "$crashingPods"
+      _crashingPods=$(kubectl get pods -l app.kubernetes.io/instance="${REF}" -n "${K8S_NAMESPACE}" -o go-template='{{range $index, $element := .items}}{{range .status.containerStatuses}}{{if gt .restartCount 2 }}{{$element.metadata.name}}{{"\n"}}{{end}}{{end}}{{end}}')
+      numCrashing=$(echo "${_crashingPods}" |wc -c)
+      ## Recognize failed release via extended crashloop
+      if test $numCrashing -gt 3 ; then
+        echo "${RED}ERROR: Found pods crashing. Adding label 'crashloop=true'"
+        echo "${RED}$_crashingPods"
+        for _pod in $_crashingPods
+        do
+          kubectl label pod "$_pod" crashloop=true
+        done
         _timeoutElapsed=$(( _timeout+1 ))
       fi
     fi

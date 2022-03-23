@@ -1,12 +1,8 @@
 #!/usr/bin/env sh
-
-CWD=$(dirname "$0")
-
 RED='\033[0;31m'
 YELLOW='\033[0;33m'
 GREEN='\033[0;32m'
 NC='\033[0m'
-
 
 # Set all Global script variables
 #   Every variable set in this section will be exported
@@ -17,18 +13,11 @@ if test -z "${GITHUB_REPOSITORY}"; then
   GITHUB_REPOSITORY="${GITHUB_REPOSITORY##https://github.com/}"
   GITHUB_REF=$(git rev-parse --abbrev-ref HEAD)
   REF="${GITHUB_REF}"
-  . "${CWD}/local-secrets.sh"
+  ls
+  # shellcheck source=local-secrets.sh
+  . "scripts/local-secrets.sh"
 fi
 
-## Existing export env variables will not be overwritten. Thus test -z ${VARIABLE_NAME}. 
-##   This allows variables to be set before the script for local testing
-
-## Eval Server profile url from github variable
-test -z "${SERVER_PROFILE_URL}" \
-  && SERVER_PROFILE_URL="https://github.com/${GITHUB_REPOSITORY}"
-## Set Domain for Ingress
-test -z "${DEFAULT_DOMAIN}" \
-  && DEFAULT_DOMAIN="ping-devops.com"
 ## Set Helm chart repo version to use
 test -z "${CHART_VERSION}" \
   && CHART_VERSION="0.8.6"
@@ -54,6 +43,10 @@ esac
 set +a
 # End: Set all Global script variables
 
+
+getGlobalVars() {
+  kubectl get cm "${REF}-global-env-vars" -o=jsonpath='{.data}' | jq -r '. | to_entries | .[] | .key + "=" + .value + ""'
+}
 
 # prep for expandFiles
 getEnvKeys() {
