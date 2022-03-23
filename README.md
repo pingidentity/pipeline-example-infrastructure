@@ -1,84 +1,66 @@
-![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/pingidentity/pingidentity-devops-reference-pipeline/DeployStable?label=prod)
-![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/pingidentity/pingidentity-devops-reference-pipeline/DeployFeature?label=latestFeature)
+Usage Guidelines
+===
+
+> DISCLAIMER: This is a template repository implementation of a **sample** CI/CD pipeline. This should not be considered production worthy, instead this repository should be used to demo and learn how to use Ping Identity Containerized Software in a GitOps Model. If you have just cloned it, start with [admin docs](./ADMIN-README.md)
+
+Welcome, Developer! Principles for interacting with this repo are defined here.
 
 
-# Reference CI/CD Pipeline
-
-**WORK IN PROGRESS**
-
-This repository aims to provide a reference example of a development lifecycle with PingIdentity Software Products. This pipeline builds on the [Getting Started Repository](https://github.com/pingidentity/pingidentity-devops-getting-started) and uses popular technologies to show how Ping Identity software can be used in a DevOps environment. The repository can be presented through a number of demos:
-
-- GitOps
-  - GitFlow and Environment Promotion
-    - CI/CD with Github Actions
-    - deployment-as-code with Helm
-    - config-as-code profiles
-  - Secrets Management
-  - Automated Testing
-
-- Monitoring
+**Table of Contents**
+- [Usage Guidelines](#usage-guidelines)
+  - [General Information](#general-information)
+    - [Variables](#variables)
+  - [Developer Prerequisites](#developer-prerequisites)
+  - [Add a Feature](#add-a-feature)
+  - [Push to Prod](#push-to-prod)
 
 
+## General Information
 
-## Current Features
+**Development Model** - Interaction follows a development model similar to [Github Flow](https://docs.github.com/en/get-started/quickstart/github-flow) or trunk-based. 
 
-- PingFederate GitOps :
-  - Automatically builds new environments for feature-building
-  - [profile script](ci_tools/pf_build_profile/pf_profile.sh) to _pull templated config based on current environment_. built with:
-    - bulk-export tool
-    - variablize
-  - Diffs to show which env variables/secrets need to be added according to config.
-- Using pingidentity/ping-devops Helm chart 
-- PF key pair secrets in Vault
-- PF.jwk as bitnami sealed secret
+**Deployment architecture** - A Single Region implementation based on guidelines in devops.pingidentity.com.
 
-## Roadmap
+**Default Branch** - main
 
-- Licenses as bitnami sealed secret
-- Docs on PF GitOps
-- PD SSO from myping
-- Health Dashboard 
-  - Downtime Monitoring
-- Continuous Traffic to prod
+**Reading Comments** - Comments are structured like Github headers. Multi-line comments are indented. For Readability, comments are not repeated with repeated code. On YAML, comment indentation matches relevant code
 
-## Setup Github Actions. 
-
-A few secrets are useful to keep in in the repository
-
-Make the following secrets in your repository: 
-Repository > Settings > Secrets > New Repository Secret
-
-**KUBE_CONFIG_YAML**
-A base64 version of your ~/.kube/config file
-
+```shell
+# Top Level Comment
+## Sub-Comment ...
+##   ... rest of Sub-Comment
+### Sub-Sub-Comment
 ```
-cat ~/.kube/config | base64 | pbcopy
-```
-add KUBE_CONFIG_YAML and paste clipboard as value
 
-**AWS_ACCESS_KEY_ID** and **AWS_SECRET_ACCESS_KEY**
+**Gitignore**
+non .subst file counterparts are tracked in .gitignore to prevent accidental commits from local testing
 
-If using EKS, you also need to add AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY variables. 
+### Variables
 
-**PING_IDENTITY_DEVOPS_USER** and **PING_IDENTITY_DEVOPS_KEY**
+Files in `helm` and `manifest` have the .subst prefix. This allows the files to hold shell variables `${FOO}`. These variables will be computed to hardcoded values before deploying. Any variable on a .subst file should be identified in `scripts/lib.sh`
 
-Eventually you will have something like:
+## Developer Prerequisites
 
-![github-secrets](images/github-secrets.png)
+- Access to the Kubernetes cluster
+- [kubectl](https://kubernetes.io/docs/tasks/tools/)
+- git
 
-## Security Holes
+_If running locally_:
 
-**Hole** - Postman collections are public.   
-**mitigation** 
-- postman collection with APIkey. 
-- postman collection in github and pulled in with init container. 
+- helm
+- envsubst
 
-**Hole** - Profiles in github
-**mitigation**
-- build profile into the image
-- make sure github repo is private. 
+## Add a Feature
 
-<!-- **Hole** - Secrets in profiles. 
-**mitigation**
-- Use vault for secrets
-- use k8s secrets for secrets. -->
+**Create a branch** off the default branch. This deploys an up-to-date, isolated environment to build a new feature. 
+
+**Follow ingress URLs** - once the environment has deployed. Features are developed through admin UIs, command line utilities, or api calls. Ingress URLs can be found with: 
+kubectl get ingress -n <namespace>
+
+**Thoroughly test** your new feature in your local environment. 
+
+**Run generate-profile script** Once ready to bring code back for a commit and pull request. The generate-profile script uses your local git branch to identify which environment to build a profile from.
+
+## Push to Prod
+
+Merge to master as frequently as needed, when ready to push a change, tag the branch. Pushing tags leaves an easy to trace history and room for rollbacks. 

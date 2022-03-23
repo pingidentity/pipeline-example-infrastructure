@@ -1,6 +1,6 @@
 This profile was created with the manage-profile generate-profile subcommand.
-It was generated at 07/May/2021:20:27:31.966 +0000 by user ping, from the
-server in /opt/out/instance.
+It was generated at 18/Jun/2019:17:52:18.878 +0000 by user root, from the
+server in /opt/server.
 
 Certain steps will always need to be taken to use this generated profile with
 the manage-profile tool. The generated profile includes a setup-arguments.txt
@@ -22,21 +22,4 @@ SDK extensions, and dsconfig commands. The profile can be modified as necessary
 for documentation and organization.
 
 For more information on the server profile, see the example profile template
-and README in the resource/ directory in the server root.
-
-The following files and directories in the server root were excluded from the
-generated profile, and can be manually added if necessary. These files can also
-be included by generate-profile with the --includePath argument:
-config/truststore
-config/ads-truststore
-config/encryption-settings.pin
-config/tools.properties.orig
-config/keystore.p12
-config/encryption-settings/encryption-settings-db
-config/tools.properties
-config/encryption-settings/encryption-settings-db.old
-config/keystore.pin
-config/keystore
-config/ads-truststore.pin
-config/truststore.p12
-config/truststore.pin
+and README in resource/server-profile-template.zip in the server root.
