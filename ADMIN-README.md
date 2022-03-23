@@ -19,7 +19,6 @@ This document separated by customizable areas:
 - [Get Running](#get-running)
   - [Prerequisites](#prerequisites)
   - [Github Secrets](#github-secrets)
-    - [KUBECONFIG_YAML](#kubeconfig_yaml)
   - [Server Profiles](#server-profiles)
 
 # Get Running
@@ -28,8 +27,7 @@ First, start by getting the simple example working.
 
 ## Prerequisites
 
-- Clone or move this repo to `~/projects/devops/pingidentity-devops-reference-pipeline`
-- Publicly Accessible Kubernetes Cluster - the cluster must be public to use free [Github Actions Hosted Runners](https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#about-github-hosted-runners). If you cannot use a publicly accessible cluster, look into [Self-hosted Runners](https://docs.github.com/en/actions/hosting-your-own-runners/about-self-hosted-runners)
+
 - Choose a namespace you have full access to in the cluster and export it in your shell:
  
   ```
@@ -42,13 +40,7 @@ CI/CD tools typically can store secrets. Here are the secrets relevant to this p
 
 - KUBECONFIG_YAML - How the CICD job runner (ubuntu machine) will identify and authenticate to the kubernetes cluster. 
 
-### KUBECONFIG_YAML
 
-The Github Actions Runner will run commands on your kubernetes cluster. To provide the runner access to your cluster, store a base64 encoded YAML [kubeconfig file](https://github.com/zecke/Kubernetes/blob/master/docs/user-guide/kubeconfig-file.md) as a Github Secret.
-
-A simple way to access the cluster is via a [service account](https://kubernetes.io/docs/reference/access-authn-authz/service-accounts-admin/).
-
-Create a service account with role based access to a namespace:
 
 
 ```
