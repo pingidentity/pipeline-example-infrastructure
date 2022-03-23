@@ -4,6 +4,8 @@ on:
     branches-ignore:
       - main
       - prod
+    tags: 
+      - 0.*
     
 
 name: Deploy Environment
