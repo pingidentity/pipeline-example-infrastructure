@@ -118,7 +118,7 @@ if test -z $_dryRun ; then
       fi
     fi
     if test ${_readyCount} -ge 3 ; then
-      echo "INFO: Successfully Deployed."
+      echo "${GREEN}INFO: Successfully Deployed.${NC}"
       exit 0
     fi
     _timeoutElapsed=$((_timeoutElapsed+6))
@@ -130,7 +130,7 @@ if test -z $_dryRun ; then
 
     cat tmp/helmdiff.txt
     set +x
-    echo "ERROR: when deploying release"
+    echo "${RED}ERROR: when deploying release${NC}"
     exit 1
   fi
 fi
