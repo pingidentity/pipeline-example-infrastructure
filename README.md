@@ -112,8 +112,8 @@ EOF
 ```
 
 ```
-export USER_TOKEN_NAME=$(kubectl -n kube-system get serviceaccount ping-devops-admin -o=jsonpath='{.secrets[0].name}')
-export USER_TOKEN_VALUE=$(kubectl -n kube-system get secret/${USER_TOKEN_NAME} -o=go-template='{{.data.token}}' | base64 --decode)
+export USER_TOKEN_NAME=$(kubectl -n ${K8S_NAMESPACE} get serviceaccount ping-devops-admin -o=jsonpath='{.secrets[0].name}')
+export USER_TOKEN_VALUE=$(kubectl -n ${K8S_NAMESPACE} get secret/${USER_TOKEN_NAME} -o=go-template='{{.data.token}}' | base64 --decode)
 export CURRENT_CONTEXT=$(kubectl config current-context)
 export CURRENT_CLUSTER=$(kubectl config view --raw -o=go-template='{{range .contexts}}{{if eq .name "'''${CURRENT_CONTEXT}'''"}}{{ index .context "cluster" }}{{end}}{{end}}')
 export CLUSTER_CA=$(kubectl config view --raw -o=go-template='{{range .clusters}}{{if eq .name "'''${CURRENT_CLUSTER}'''"}}"{{with index .cluster "certificate-authority-data" }}{{.}}{{end}}"{{ end }}{{ end }}')
@@ -121,7 +121,7 @@ export CLUSTER_SERVER=$(kubectl config view --raw -o=go-template='{{range .clust
 ```
 
 ```
-cat << EOF > ping-devops-admin-config
+cat << EOF > ${HOME}/.kube/ping-devops-admin-config
 apiVersion: v1
 kind: Config
 current-context: ${CURRENT_CONTEXT}
@@ -130,7 +130,7 @@ contexts:
   context:
     cluster: ${CURRENT_CONTEXT}
     user: ping-devops-admin
-    namespace: kube-system
+    namespace: ${K8S_NAMESPACE}
 clusters:
 - name: ${CURRENT_CONTEXT}
   cluster:
@@ -143,9 +143,11 @@ users:
 EOF
 ```
 
-Create a service account with role-based access to a namespace:
+Set this file as your kubeconfig:
 
-
+```
+export KUBECONFIG="${HOME}/.kube/ping-devops-admin-config"
+```
 
 ## Add a Feature
 
