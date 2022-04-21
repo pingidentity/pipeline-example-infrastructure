@@ -1,7 +1,6 @@
 #!/usr/bin/env sh
 CWD=$(dirname "$0")
 
-## Friendly script info
 usage ()
 {
 cat <<END_USAGE
@@ -75,6 +74,7 @@ helm upgrade --install \
 
 ## For Statefulsets that failed previously, the crashing pod is deleted to pick up new changes
 ##    this is per: https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#forced-rollback
+##
 ## Also, some crashing pods may not have been properly labeled previously.
 _podList=$(kubectl get pod --selector=crashloop=true -o jsonpath='{..metadata.name}')
 
@@ -127,7 +127,7 @@ if test -z $_dryRun ; then
   done
 
   ## Getting this far is an error
-  ## show what changed to help identify errors
+  ##   show what changed to help identify errors
   if test ${_timeoutElapsed} -ge ${_timeout} ; then
 
     cat tmp/helmdiff.txt
