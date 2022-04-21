@@ -10,7 +10,7 @@ This document is formatted as such:
 - Start by launching an environment
 - Understand what is running
 - Complete a simple feature flow
-- Consider what is available customization
+- Consider what customization is available
 
 
 
@@ -20,22 +20,27 @@ This document is formatted as such:
   - [Prerequisites](#prerequisites)
   - [Launch an Environment](#launch-an-environment)
     - [KUBECONFIG_YAML](#kubeconfig_yaml)
-  - [Add a Feature](#add-a-feature)
+  - [Prepare Profiles](#prepare-profiles)
+    - [Use Ping Identity's Baseline Server Profiles](#use-ping-identitys-baseline-server-profiles)
+    - [Bring Your Own Profiles](#bring-your-own-profiles)
+  - [Adjust Default Deployment](#adjust-default-deployment)
+    - [Ingress](#ingress)
+    - [Products](#products)
   - [Push to Prod](#push-to-prod)
 
 ## General Information
 
 **Development Model** - Interaction follows a development model similar to [Github Flow](https://docs.github.com/en/get-started/quickstart/github-flow) or trunk-based. 
 
-**Deployment architecture** - A Single Region implementation based on guidelines in devops.pingidentity.com.
+**Deployment architecture** - A Single Region implementation based on guidelines in [devops.pingidentity.com](devops.pingidentity.com).
 
 **Default Branch** - prod
 
 **Variables**
 
-Files in `helm` and `manifest` have the .subst prefix. This allows the files to hold shell variables `${FOO}`. These variables will be computed to hardcoded values before deploying. Any variable on a .subst file should be identified in `scripts/lib.sh`
+Files in `helm` and `manifest` have the .subst prefix. This allows the files to hold shell variables `${FOO}`. These variables will be computed to hardcoded values before deploying. Any variable on a .subst file should have a default set in `scripts/lib.sh`
 
-**Reading Comments** - Comments are structured like Github headers. Multi-line comments are indented. For Readability, comments are not repeated with repeated code. On YAML, comment indentation matches relevant code
+**Reading Comments** - Comments are structured like Markdown headers. Multi-line comments are indented. For Readability, comments are not repeated with repeated code. On YAML, comment indentation matches relevant code
 
 ```shell
 # Top Level Comment
@@ -49,10 +54,15 @@ non .subst file counterparts are tracked in .gitignore to prevent accidental com
 
 ## Prerequisites
 
-- Clone this repo to `~/projects/devops/pingidentity-devops-reference-pipeline`
+Required:
+
+- Set up template repo
+  - click "Use This Template" to add it as a repository on your account.
+  - git clone the new repo to `~/projects/devops/pingidentity-devops-reference-pipeline`
 - Publicly Accessible Kubernetes Cluster - the cluster must be _publicly accessible_ to use free [Github Actions Hosted Runners](https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#about-github-hosted-runners). If you cannot use a publicly accessible cluster, look into [Self-hosted Runners](https://docs.github.com/en/actions/hosting-your-own-runners/about-self-hosted-runners)
 - [kubectl](https://kubernetes.io/docs/tasks/tools/)
-- git
+- [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
+- Understanding of [Helm](https://helm.sh/docs/intro/quickstart/) and consuming Helm Charts
 
 ## Launch an Environment
 
@@ -149,7 +159,65 @@ Set this file as your kubeconfig:
 export KUBECONFIG="${HOME}/.kube/ping-devops-admin-config"
 ```
 
-## Add a Feature
+## Prepare Profiles
+
+Server Profiles are used to deploy configuration to products. This repo use the profiles directory for uploading config.
+
+### Use Ping Identity's Baseline Server Profiles
+
+[Ping Identity's Baseline Server Profiles](https://github.com/pingidentity/pingidentity-server-profiles/tree/master/baseline) are maintained for demo and testing purposes. Eventually you will want to [bring your own profiles](#bring-your-own-profiles)
+
+To test this environment quickly use the [baseline server-profile](https://github.com/pingidentity/pingidentity-server-profiles/tree/master/baseline).
+
+```
+cd ~/projects/devops
+git clone https://github.com/pingidentity/pingidentity-server-profiles.git ~/projects/devops/pingidentity-server-profiles
+cp -r ~/projects/devops/pingidentity-server-profiles/baseline/* ~/projects/devops/pingidentity-devops-reference-pipeline/profiles
+```
+
+To match product names on the helm chart, make some adjustments:
+
+```
+cd ~/projects/devops/pingidentity-devops-reference-pipeline/profiles
+mv pingaccess pingaccess-engine
+mv pingfederate pingfederate-engine
+mkdir -p pingaccess-admin/instance pingfederate-admin/instance
+mv pingaccess-engine/instance/data pingaccess-admin/instance/data
+mv pingfederate-engine/instance/bulk-config pingfederate-admin/instance/bulk-config
+mv pingdatagovernance pingauthorize
+cp -r pingcentral/dev-unsecure/instance pingcentral
+rm -rf CONTRIBUTING.md DISCLAIMER LICENSE docker-compose.yaml pingdataconsole-8.3 pingdatagovernance-8.1.0.0
+cd -
+```
+
+### Bring Your Own Profiles
+
+<!-- TODO -->
+
+
+## Adjust Default Deployment
+
+The default deployment will deploy a number of software products with simple configurations and [ingresses](https://kubernetes.io/docs/concepts/services-networking/ingress/). Ingresses rely on the kubernetes cluster having an [ingress controller](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/) deployed. 
+
+### Ingress
+
+The default setup on [values.yaml.subst] will work for an nginx ingress controller with class "nginx-public". Update `global.ingress` on values.yaml to match your environment.
+
+### Products
+
+If you want to remove any products, change `<product>.enabled` to false. Over time, as you become more comfortable with the repo you can remove those pieces. 
+
+Example for turning off pingdataconsole:
+
+```
+pingdataconsole:
+  enabled: false
+  envs:
+    SERVER_PROFILE_PATH: profiles/pingdataconsole
+    PDC_PROFILE_SHA: "${PINGDATACONSOLE_SHA}"
+```
+
+
 
 **Create a branch** off the default branch. This deploys an up-to-date, isolated environment to build a new feature. 
 
