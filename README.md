@@ -20,6 +20,7 @@ This document is formatted as such:
   - [Prerequisites](#prerequisites)
   - [Launch an Environment](#launch-an-environment)
     - [KUBECONFIG_YAML](#kubeconfig_yaml)
+    - [DevOps User and Key](#devops-user-and-key)
   - [Prepare Profiles](#prepare-profiles)
     - [Use Ping Identity's Baseline Server Profiles](#use-ping-identitys-baseline-server-profiles)
     - [Bring Your Own Profiles](#bring-your-own-profiles)
@@ -59,6 +60,7 @@ Required:
 - Set up template repo
   - click "Use This Template" to add it as a repository on your account.
   - git clone the new repo to `~/projects/devops/pingidentity-devops-reference-pipeline`
+  > IMPORTANT: The folder name and is hardcoded in following commands.
 - Publicly Accessible Kubernetes Cluster - the cluster must be _publicly accessible_ to use free [Github Actions Hosted Runners](https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#about-github-hosted-runners). If you cannot use a publicly accessible cluster, look into [Self-hosted Runners](https://docs.github.com/en/actions/hosting-your-own-runners/about-self-hosted-runners)
 - [kubectl](https://kubernetes.io/docs/tasks/tools/)
 - [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
@@ -153,42 +155,42 @@ users:
 EOF
 ```
 
-Set this file as your kubeconfig:
+To trigger deployments locally as well as from GitHub Actions, set this file as your kubeconfig:
 
 ```
 export KUBECONFIG="${HOME}/.kube/ping-devops-admin-config"
 ```
 
+Base64 encode the contents of this file and create a [GitHub Actions Secret](https://docs.github.com/en/actions/security-guides/encrypted-secrets):
+
+```
+cat ${HOME}/.kube/ping-devops-admin-config | base64 | pbcopy
+```
+
+> Note, `pbcopy` on Mac copies stdin for the command to the clipboard
+
+![gh-secret](img/kubeconfig-secret.png)
+
+### DevOps User and Key
+
+Create a GitHub Actions Secrets for your Ping Identity DevOps User and Key.
+If the PING_IDENTITY_DEVOPS_USER and PING_IDENTITY_DEVOPS_KEY variables are sourced in your environment:
+
+```
+echo "${PING_IDENTITY_DEVOPS_USER}" | base64 | pbcopy
+```
+Create a secret named PING_IDENTITY_DEVOPS_USER_BASE64 with the value. 
+
 ## Prepare Profiles
 
-Server Profiles are used to deploy configuration to products. This repo use the profiles directory for uploading config.
+Server Profiles are used to deploy configuration to products. The pipeline uses the profiles directory for storing config.
 
 ### Use Ping Identity's Baseline Server Profiles
-
+<!-- TODO CLEAN THIS UP-->
 [Ping Identity's Baseline Server Profiles](https://github.com/pingidentity/pingidentity-server-profiles/tree/master/baseline) are maintained for demo and testing purposes. Eventually you will want to [bring your own profiles](#bring-your-own-profiles)
 
 To test this environment quickly use the [baseline server-profile](https://github.com/pingidentity/pingidentity-server-profiles/tree/master/baseline).
 
-```
-cd ~/projects/devops
-git clone https://github.com/pingidentity/pingidentity-server-profiles.git ~/projects/devops/pingidentity-server-profiles
-cp -r ~/projects/devops/pingidentity-server-profiles/baseline/* ~/projects/devops/pingidentity-devops-reference-pipeline/profiles
-```
-
-To match product names on the helm chart, make some adjustments:
-
-```
-cd ~/projects/devops/pingidentity-devops-reference-pipeline/profiles
-mv pingaccess pingaccess-engine
-mv pingfederate pingfederate-engine
-mkdir -p pingaccess-admin/instance pingfederate-admin/instance
-mv pingaccess-engine/instance/data pingaccess-admin/instance/data
-mv pingfederate-engine/instance/bulk-config pingfederate-admin/instance/bulk-config
-mv pingdatagovernance pingauthorize
-cp -r pingcentral/dev-unsecure/instance pingcentral
-rm -rf CONTRIBUTING.md DISCLAIMER LICENSE docker-compose.yaml pingdataconsole-8.3 pingdatagovernance-8.1.0.0
-cd -
-```
 
 ### Bring Your Own Profiles
 
