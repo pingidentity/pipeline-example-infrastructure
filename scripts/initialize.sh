@@ -158,3 +158,6 @@ else
   mkdir profiles
   echo "${YELLOW} Be sure to fill out the profiles folder.."
 fi
+
+echo "${YELLOW} Initialization completed successfully.
+To run locally, set: KUBECONFIG=${CWD}/@kubeconfig"
