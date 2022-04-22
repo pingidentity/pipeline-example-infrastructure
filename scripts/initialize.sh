@@ -156,8 +156,7 @@ if test "${REPLY}" = "y"; then
   cd - || exit
 else
   mkdir profiles
-  echo "${YELLOW} Be sure to fill out the profiles folder.."
+  echo "${YELLOW} Be sure to fill out the profiles folder..${NC}"
 fi
 
-echo "${YELLOW} Initialization completed successfully.
-To run locally, set: KUBECONFIG=${CWD}/@kubeconfig"
+echo "${GREEN} Initialization completed successfully.${NC}"
