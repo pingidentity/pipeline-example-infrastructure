@@ -1,10 +1,8 @@
 @*
 # *.final
 *.DS_Store
-values.dev.yaml
-values.yaml
+*.final
 local-secrets.sh
-devops-secret.yaml
 tmp
 expandedFiles
 k8stmp

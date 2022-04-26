@@ -55,15 +55,15 @@ envsubstFiles "helm" "manifest"
 # START: Deploy
 
 ## Apply all evaluated kubernetes manifest files
-find "manifest" -type f -regex ".*yaml$" >> k8stmp
+find "manifest" -type f -regex ".*final$" >> k8stmp
 while IFS= read -r k8sFile; do
   kubectl apply -f "$k8sFile" $_dryRun -o yaml
 done < k8stmp
 test -z "${_dryRun}" && rm k8stmp
 
 ## Identify possible values.yaml files
-VALUES_FILE=${VALUES_FILE:=helm/values.yaml}
-VALUES_DEV_FILE=${VALUES_DEV_FILE:=helm/values.dev.yaml}
+VALUES_FILE=${VALUES_FILE:=helm/values.yaml.final}
+VALUES_DEV_FILE=${VALUES_DEV_FILE:=helm/values.dev.yaml.final}
 test "${REF}" != "prod" && _valuesDevFile="-f ${VALUES_DEV_FILE}"
 
 ## Helm Deploy
@@ -78,7 +78,8 @@ helm upgrade --install \
 ## Also, some crashing pods may not have been properly labeled previously.
 _podList=$(kubectl get pod --selector=crashloop=true -o jsonpath='{..metadata.name}')
 
-kubectl delete pod $(printf "%s " $_podList) --force --grace-period=0 "${_dryRun}"
+test ! -z "${_podList}" \
+  && kubectl delete pod $(printf "%s " $_podList) --force --grace-period=0 "${_dryRun}"
 
 # Finish by cleaning up hardcoded files if not a dry-run
 test -z "${_dryRun}" && cleanExpandedFiles

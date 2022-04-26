@@ -19,7 +19,7 @@ fi
 
 ## Set Helm chart repo version to use
 test -z "${CHART_VERSION}" \
-  && CHART_VERSION="0.8.6"
+  && CHART_VERSION="0.9.0"
 
 export DEFAULT_BRANCH=prod
 
@@ -51,12 +51,12 @@ envsubstFiles() {
       _expandPath="${1}"
       echo "  Processing templates"
 
-      find "${_expandPath}" -type f -iname "*.subst" > tmpFileList
+      find "${_expandPath}" -type f -iname "*.yaml" > tmpFileList
       while IFS= read -r template; do
           echo "    t - ${template}"
           _templateDir="$(dirname ${template})"
           _templateBase="$(basename ${template})"
-          envsubst "'$(getEnvKeys)'" < "${template}" > "${_templateDir}/${_templateBase%.subst}"
+          envsubst "'$(getEnvKeys)'" < "${template}" > "${_templateDir}/${_templateBase}.final"
           echo "${_templateDir}/${_templateBase%.subst}" >> expandedFiles
       done < tmpFileList
       rm tmpFileList
