@@ -26,7 +26,7 @@ else
   exit_usage "${HOME}/.pingidentity/config not found"
 fi
 
-for _tool in ghp kubectl helm base64;  do
+for _tool in gh kubectl helm base64;  do
   if ! type $_tool >/dev/null 2>&1 ; then
     echo "${RED}$_tool not found${NC}"
     _missingTool="true"
