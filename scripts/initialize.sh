@@ -136,9 +136,6 @@ fi
 # Set all local and GH Secrets
 echo "#!/usr/bin/env sh" > "${CWD}/local-secrets.sh"
 
-_generateKubeconfig
-_setDevopsSecret
-
 read -p "Do you want to use Ping Identity Baseline demo profiles? (y/n)"
 if test "${REPLY}" = "y"; then
   _pingProfilesDir="/tmp/ping-server-profiles"
@@ -155,10 +152,14 @@ if test "${REPLY}" = "y"; then
   mv pingfederate-engine/instance/bulk-config pingfederate-admin/instance/bulk-config
   cp -r pingcentral/dev-unsecure/instance pingcentral
   rm -rf CONTRIBUTING.md DISCLAIMER LICENSE docker-compose.yaml pingdataconsole-8.3 pingdatagovernance-8.1.0.0 pingdatagovernance
-  cd - || exit
+  cd -  >/dev/null 2>&1 || exit
+  git add profiles >/dev/null 2>&1
+  git commit -m "Add Ping Identity Baseline" >/dev/null 2>&1
+  git push origin
 else
   mkdir profiles
   echo "${YELLOW} Be sure to fill out the profiles folder..${NC}"
 fi
+
 
 echo "${GREEN} Initialization completed successfully.${NC}"
