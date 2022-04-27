@@ -113,7 +113,9 @@ users:
 EOF
 
 ## create KUBECONFIG_YAML secret
-base64 "${CWD}/@kubeconfig" | tr -d \\n | gh secret set KUBECONFIG_YAML -b -
+base64 "${CWD}/@kubeconfig" | tr -d \\n > "${CWD}/@kubeconfigb64"
+gh secret set KUBECONFIG_YAML < "${CWD}/@kubeconfigb64"
+rm "${CWD}/@kubeconfigb64"
 }
 
 _setDevopsSecret(){
