@@ -113,7 +113,7 @@ users:
 EOF
 
 ## create KUBECONFIG_YAML secret
-base64 "${CWD}/@kubeconfig" | gh secret set KUBECONFIG_YAML -b -
+base64 "${CWD}/@kubeconfig" | tr -d \\n | gh secret set KUBECONFIG_YAML -b -
 }
 
 _setDevopsSecret(){
@@ -137,10 +137,10 @@ fi
 echo "#!/usr/bin/env sh" > "${CWD}/local-secrets.sh"
 
 read -p "Do you want to use Ping Identity Baseline demo profiles? (y/n)"
-if test "${REPLY}" = "y"; then
+if test "${REPLY}" != "n"; then
   _pingProfilesDir="/tmp/ping-server-profiles"
   test -d "${_pingProfilesDir}" && rm -rf "${_pingProfilesDir}"
-  git clone --branch "2203" https://github.com/pingidentity/pingidentity-server-profiles.git "${_pingProfilesDir}"
+  git clone --branch "2203" https://github.com/pingidentity/pingidentity-server-profiles.git "${_pingProfilesDir}"  >/dev/null 2>&1
   test $? -ne 0 && exit_usage "Failed Clone"
   mkdir profiles
   cp -r ${_pingProfilesDir}/baseline/* profiles
@@ -161,5 +161,7 @@ else
   echo "${YELLOW} Be sure to fill out the profiles folder..${NC}"
 fi
 
+_generateKubeconfig
+_setDevopsSecret
 
 echo "${GREEN} Initialization completed successfully.${NC}"
