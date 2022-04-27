@@ -14,7 +14,7 @@ if test -z "${GITHUB_REPOSITORY}"; then
   GITHUB_REF=$(git rev-parse --abbrev-ref HEAD)
   REF="${GITHUB_REF}"
   # shellcheck source=local-secrets.sh
-  . "scripts/local-secrets.sh"
+  test -f "scripts/local-secrets.sh" && . "scripts/local-secrets.sh" 
 fi
 
 ## Set Helm chart repo version to use
