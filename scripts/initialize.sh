@@ -146,7 +146,7 @@ if test "${REPLY}" = "y"; then
   git clone --branch "2203" https://github.com/pingidentity/pingidentity-server-profiles.git "${_pingProfilesDir}"
   test $? -ne 0 && exit_usage "Failed Clone"
   mkdir profiles
-  cp -r "${_pingProfilesDir}/baseline/*" profiles
+  cp -r ${_pingProfilesDir}/baseline/* profiles
   cd profiles || exit
   mv pingaccess pingaccess-engine
   mv pingfederate pingfederate-engine
