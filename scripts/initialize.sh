@@ -26,6 +26,7 @@ else
   exit_usage "${HOME}/.pingidentity/config not found"
 fi
 
+_missingTool="false"
 for _tool in gh kubectl helm base64;  do
   if ! type $_tool >/dev/null 2>&1 ; then
     echo "${RED}$_tool not found${NC}"
@@ -141,6 +142,7 @@ _setDevopsSecret
 read -p "Do you want to use Ping Identity Baseline demo profiles? (y/n)"
 if test "${REPLY}" = "y"; then
   _pingProfilesDir="/tmp/ping-server-profiles"
+  test -d "${_pingProfilesDir}" && rm -rf "${_pingProfilesDir}"
   git clone --branch "2203" https://github.com/pingidentity/pingidentity-server-profiles.git "${_pingProfilesDir}"
   test $? -ne 0 && exit_usage "Failed Clone"
   mkdir profiles
