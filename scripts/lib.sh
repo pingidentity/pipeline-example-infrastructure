@@ -24,17 +24,20 @@ test -z "${CHART_VERSION}" \
 export DEFAULT_BRANCH=prod
 
 ## Determine trigger
-### This pattern will match if the workflow trigger is a branch
-test -z ${REF} \
-  && REF=$(echo "${GITHUB_REF}" | sed -e "s#refs/heads/##g")
-### This pattern will match if the workflow trigger is prod
-test "${GITHUB_REF}" != "${GITHUB_REF%%"${DEFAULT_BRANCH}"}" \
-  && REF=prod
-
+set -x
+if test -z ${REF} ; then 
+  ### This pattern will match if the workflow trigger is prod
+  if test "${GITHUB_REF}" != "${GITHUB_REF%%"${DEFAULT_BRANCH}"}" ; then
+  REF=prod
+  else
+  ### This pattern will match if the workflow trigger is a branch
+  REF=$(echo "${GITHUB_REF}" | sed -e "s#refs/heads/##g")
+  fi
+fi
 set +a
 # End: Set all Global script variables
 
-echo "${REF}"
+echo "${YELLOW}INFO: Environment is: ${REF}${NC}"
 getGlobalVars() {
   kubectl get cm "${REF}-global-env-vars" -o=jsonpath='{.data}' | jq -r '. | to_entries | .[] | .key + "=" + .value + ""'
 }
