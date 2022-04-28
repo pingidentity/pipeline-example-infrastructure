@@ -140,6 +140,7 @@ echo "#!/usr/bin/env sh" > "${CWD}/local-secrets.sh"
 
 read -p "Do you want to use Ping Identity Baseline demo profiles? (y/n)"
 if test "${REPLY}" != "n"; then
+  echo "${GREEN}INFO: Preparing Baseline${NC}"
   _pingProfilesDir="/tmp/ping-server-profiles"
   test -d "${_pingProfilesDir}" && rm -rf "${_pingProfilesDir}"
   git clone --branch "2203" https://github.com/pingidentity/pingidentity-server-profiles.git "${_pingProfilesDir}"  >/dev/null 2>&1

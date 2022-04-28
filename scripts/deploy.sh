@@ -102,6 +102,7 @@ if test -z $_dryRun ; then
   helm diff revision "${REF}" $revCurrent $revPrevious --no-color -C 0 > tmp/helmdiff.txt
 
   ## Watch helm release for pods going to crashloop
+  echo "${YELLOW}INFO: Watching Release, DO NOT STOP SCRIPT${NC}"
   while test ${_timeoutElapsed} -lt ${_timeout} ; do
     sleep 6
     if test $(kubectl get pods -l app.kubernetes.io/instance="${REF}" -n "${K8S_NAMESPACE}" -o go-template='{{range $index, $element := .items}}{{range .status.containerStatuses}}{{if not .ready}}{{$element.metadata.name}}{{"\n"}}{{end}}{{end}}{{end}}' | wc -l ) = 0 ; then
@@ -113,8 +114,8 @@ if test -z $_dryRun ; then
       numCrashing=$(echo "${_crashingPods}" |wc -c)
       ## Recognize failed release via extended crashloop
       if test $numCrashing -ge 3 ; then
-        echo "${RED}ERROR: Found pods crashing. Adding label 'crashloop=true'"
-        echo "${RED}$_crashingPods"
+        echo "${RED}ERROR: Found pods crashing. Adding label 'crashloop=true'${NC}"
+        echo "${RED}$_crashingPods${NC}"
         for _pod in $_crashingPods
         do
           kubectl label pod "$_pod" crashloop=true
@@ -135,7 +136,8 @@ if test -z $_dryRun ; then
 
     cat tmp/helmdiff.txt
     set +x
-    echo "${RED}ERROR: when deploying release${NC}"
+    echo "${RED}ERROR: Unsuccessful Deployment${NC}"
+    echo "${RED}ERROR: Crashing Pods: $_crashingPods${NC}"
     exit 1
   fi
 fi
