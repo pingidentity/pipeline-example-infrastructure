@@ -67,6 +67,7 @@ VALUES_DEV_FILE=${VALUES_DEV_FILE:=helm/values.dev.yaml.final}
 test "${REF}" != "prod" && _valuesDevFile="-f ${VALUES_DEV_FILE}"
 
 ## Helm Deploy
+echo "${GREEN}INFO: Running Helm upgrade${NC}"
 helm upgrade --install \
   "${REF}" pingidentity/ping-devops \
   -f "${VALUES_FILE}" ${_valuesDevFile}  \
@@ -98,7 +99,7 @@ if test -z $_dryRun ; then
   revCurrent=$(helm ls --filter "${REF}" -o json | jq -r '.[0].revision')
   revPrevious=$(( revCurrent-1 ))
   test ! -d tmp && mkdir tmp
-  helm diff revision "${REF}" $revCurrent $revPrevious --no-color > tmp/helmdiff.txt
+  helm diff revision "${REF}" $revCurrent $revPrevious --no-color -C 0 > tmp/helmdiff.txt
 
   ## Watch helm release for pods going to crashloop
   while test ${_timeoutElapsed} -lt ${_timeout} ; do
@@ -107,7 +108,8 @@ if test -z $_dryRun ; then
       _readyCount=$(( _readyCount+1 ))
       sleep 4
     else 
-      _crashingPods=$(kubectl get pods -l app.kubernetes.io/instance="${REF}" -n "${K8S_NAMESPACE}" -o go-template='{{range $index, $element := .items}}{{range .status.containerStatuses}}{{if gt .restartCount 2 }}{{$element.metadata.name}}{{"\n"}}{{end}}{{end}}{{end}}')
+      ## _crashingPods are pods that are not ready, and have more than 2 restarts
+      _crashingPods=$(kubectl get pods -l app.kubernetes.io/instance="${REF}" -n "${K8S_NAMESPACE}" -o go-template='{{range $index, $element := .items}}{{range .status.containerStatuses}}{{if and (gt .restartCount 2) (not .ready) }}{{$element.metadata.name}}{{"\n"}}{{end}}{{end}}{{end}}')
       numCrashing=$(echo "${_crashingPods}" |wc -c)
       ## Recognize failed release via extended crashloop
       if test $numCrashing -ge 3 ; then

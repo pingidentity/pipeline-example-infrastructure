@@ -10,7 +10,7 @@ set -a
 ## Determine if this script is being run locally or from a pipeline:
 if test -z "${GITHUB_REPOSITORY}"; then
   GITHUB_REPOSITORY=$(git remote get-url origin)
-  GITHUB_REPOSITORY="${GITHUB_REPOSITORY##https://github.com/}"
+  GITHUB_REPOSITORY="$(echo ${GITHUB_REPOSITORY##https://github.com/} | sed s/\.git//)"
   GITHUB_REF=$(git rev-parse --abbrev-ref HEAD)
   REF="${GITHUB_REF}"
   # shellcheck source=local-secrets.sh
