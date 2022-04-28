@@ -24,7 +24,6 @@ test -z "${CHART_VERSION}" \
 export DEFAULT_BRANCH=prod
 
 ## Determine trigger
-set -x
 if test -z ${REF} ; then 
   ### This pattern will match if the workflow trigger is prod
   if test "${GITHUB_REF}" != "${GITHUB_REF%%"${DEFAULT_BRANCH}"}" ; then
