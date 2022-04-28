@@ -27,7 +27,7 @@ export DEFAULT_BRANCH=prod
 ### This pattern will match if the workflow trigger is a branch
 test -z ${REF} \
   && REF=$(echo "${GITHUB_REF}" | sed -e "s#refs/heads/##g")
-### This pattern will match if the workflow trigger is a tag
+### This pattern will match if the workflow trigger is prod
 test "${GITHUB_REF}" != "${GITHUB_REF%%"${DEFAULT_BRANCH}"}" \
   && REF=prod
 

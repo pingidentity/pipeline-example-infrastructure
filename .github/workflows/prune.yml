@@ -38,4 +38,6 @@ jobs:
         sudo apt install yq -y
 
     - name: Cleanup Feature K8S Env
-      run: sh scripts/prune.sh --heavy
+      run: |
+        export REF=$(echo "${{ github.event.ref }}" | sed -e "s#refs/heads/##g")
+        sh scripts/prune.sh --heavy
