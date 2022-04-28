@@ -35,6 +35,7 @@ pingaccess-admin:
     #   SHA is based on git history of the profiles folder.
     PA_ADMIN_PROFILE_SHA: "${PINGACCESS_ADMIN_SHA}"
     PA_ENGINE_PROFILE_SHA: "${PINGACCESS_ENGINE_SHA}"
+  container:
     waitFor:
       pingfederate-admin:
         service: https
