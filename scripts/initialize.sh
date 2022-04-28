@@ -119,6 +119,7 @@ rm "${CWD}/@kubeconfigb64"
 }
 
 _setDevopsSecret(){
+  test -z ${PING_IDENTITY_DEVOPS_USER} && exit_usage "PING_IDENTITY_DEVOPS_USER not found in shell environment"
   PING_IDENTITY_DEVOPS_USER_BASE64=$(printf "${PING_IDENTITY_DEVOPS_USER}" | base64 | tr -d '\r?\n')
   PING_IDENTITY_DEVOPS_KEY_BASE64=$(printf ${PING_IDENTITY_DEVOPS_KEY} | base64 | tr -d '\r?\n')
   gh secret set PING_IDENTITY_DEVOPS_USER_BASE64 -b"${PING_IDENTITY_DEVOPS_USER_BASE64}"
@@ -164,7 +165,7 @@ else
   echo "${YELLOW} Be sure to fill out the profiles folder..${NC}"
 fi
 
-_generateKubeconfig
 _setDevopsSecret
+_generateKubeconfig
 
 echo "${GREEN} Initialization completed successfully.${NC}"

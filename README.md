@@ -19,14 +19,15 @@ This document is formatted as such:
   - [General Information](#general-information)
   - [Prerequisites](#prerequisites)
   - [Launch an Environment](#launch-an-environment)
-    - [KUBECONFIG_YAML](#kubeconfig_yaml)
-    - [DevOps User and Key](#devops-user-and-key)
+  - [Explanation](#explanation)
+  - [Cleanup](#cleanup)
   - [Prepare Profiles](#prepare-profiles)
     - [Use Ping Identity's Baseline Server Profiles](#use-ping-identitys-baseline-server-profiles)
     - [Bring Your Own Profiles](#bring-your-own-profiles)
   - [Adjust Default Deployment](#adjust-default-deployment)
     - [Ingress](#ingress)
     - [Products](#products)
+  - [](#)
   - [Push to Prod](#push-to-prod)
 
 ## General Information
@@ -62,6 +63,7 @@ Required:
   - git clone the new repo to `~/projects/devops/pingidentity-devops-reference-pipeline`
   > IMPORTANT: The folder name and is hardcoded in following commands.
 - Publicly Accessible Kubernetes Cluster - the cluster must be _publicly accessible_ to use free [Github Actions Hosted Runners](https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#about-github-hosted-runners). If you cannot use a publicly accessible cluster, look into [Self-hosted Runners](https://docs.github.com/en/actions/hosting-your-own-runners/about-self-hosted-runners)
+- pingctl configured or PING_IDENTITY_DEVOPS_USER/KEY exported in environment
 - [kubectl](https://kubernetes.io/docs/tasks/tools/)
 - [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
 - Understanding of [Helm](https://helm.sh/docs/intro/quickstart/) and consuming Helm Charts
@@ -70,116 +72,33 @@ Required:
 
 Start by getting a simple environment running. 
 
-### KUBECONFIG_YAML
-
-The Github Actions Runner will run commands on your kubernetes cluster. To provide the runner access to your cluster, store a base64 encoded YAML [kubeconfig file](https://github.com/zecke/Kubernetes/blob/master/docs/user-guide/kubeconfig-file.md) as a Github Secret.
-
-A simple way to access the cluster is via a [service account](https://kubernetes.io/docs/reference/access-authn-authz/service-accounts-admin/).
-
-> This pipeline will run entirely in one namespace, define the namespace in your local shell environment
+The following script will prepare your local and remote repo. For a quick demo, accept the defaults. 
 
 ```
-export K8S_NAMESPACE=<ping-devops-user>
+./scripts/initialize.sh
 ```
 
-```
-cat <<EOF | kubectl apply -f -
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: ping-devops-admin
-  namespace: ${K8S_NAMESPACE}
----
-apiVersion: v1
-items:
-- apiVersion: rbac.authorization.k8s.io/v1
-  kind: Role
-  metadata:
-    name: namespace-admin
-    namespace: ${K8S_NAMESPACE}
-  rules:
-  - apiGroups:
-    - '*'
-    resources:
-    - '*'
-    verbs:
-    - '*'
-kind: List
-metadata:
-  resourceVersion: ""
-  selfLink: ""
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: namespace-admin
-roleRef:
-  kind: Role
-  name: namespace-admin
-  apiGroup: rbac.authorization.k8s.io
-subjects:
-- kind: ServiceAccount
-  name: ping-devops-admin
-EOF
-```
+To deploy an environment, create and push new branch via cli (or  GitHub Web):
 
 ```
-export USER_TOKEN_NAME=$(kubectl -n ${K8S_NAMESPACE} get serviceaccount ping-devops-admin -o=jsonpath='{.secrets[0].name}')
-export USER_TOKEN_VALUE=$(kubectl -n ${K8S_NAMESPACE} get secret/${USER_TOKEN_NAME} -o=go-template='{{.data.token}}' | base64 --decode)
-export CURRENT_CONTEXT=$(kubectl config current-context)
-export CURRENT_CLUSTER=$(kubectl config view --raw -o=go-template='{{range .contexts}}{{if eq .name "'''${CURRENT_CONTEXT}'''"}}{{ index .context "cluster" }}{{end}}{{end}}')
-export CLUSTER_CA=$(kubectl config view --raw -o=go-template='{{range .clusters}}{{if eq .name "'''${CURRENT_CLUSTER}'''"}}"{{with index .cluster "certificate-authority-data" }}{{.}}{{end}}"{{ end }}{{ end }}')
-export CLUSTER_SERVER=$(kubectl config view --raw -o=go-template='{{range .clusters}}{{if eq .name "'''${CURRENT_CLUSTER}'''"}}{{ .cluster.server }}{{end}}{{ end }}')
+git checkout -b mydemo
+git push origin mydemo
 ```
 
-```
-cat << EOF > ${HOME}/.kube/ping-devops-admin-config
-apiVersion: v1
-kind: Config
-current-context: ${CURRENT_CONTEXT}
-contexts:
-- name: ${CURRENT_CONTEXT}
-  context:
-    cluster: ${CURRENT_CONTEXT}
-    user: ping-devops-admin
-    namespace: ${K8S_NAMESPACE}
-clusters:
-- name: ${CURRENT_CONTEXT}
-  cluster:
-    certificate-authority-data: ${CLUSTER_CA}
-    server: ${CLUSTER_SERVER}
-users:
-- name: ping-devops-admin
-  user:
-    token: ${USER_TOKEN_VALUE}
-EOF
-```
+Watch the deployment in GitHub Actions Logs and your k8s namespace.
 
-To trigger deployments locally as well as from GitHub Actions, set this file as your kubeconfig:
 
-```
-export KUBECONFIG="${HOME}/.kube/ping-devops-admin-config"
-```
+## Explanation
 
-Base64 encode the contents of this file and create a [GitHub Actions Secret](https://docs.github.com/en/actions/security-guides/encrypted-secrets):
+The initialize script took steps to prepare your local and remote repositories:
+1. Prep Baseline:
+   1. git clone Ping Identity Server Profiles baseline folder
+   2. copy to a `profiles` folder
+   3. rename folders in `profiles` to match product names on pingidentity/ping-devops helm chart. 
 
-```
-cat ${HOME}/.kube/ping-devops-admin-config | base64 | pbcopy
-```
+## Cleanup
 
-> Note, `pbcopy` on Mac copies stdin for the command to the clipboard
-
-![gh-secret](img/kubeconfig-secret.png)
-
-### DevOps User and Key
-
-Create a GitHub Actions Secrets for your Ping Identity DevOps User and Key.
-If the PING_IDENTITY_DEVOPS_USER and PING_IDENTITY_DEVOPS_KEY variables are sourced in your environment:
-
-```
-echo "${PING_IDENTITY_DEVOPS_USER}" | base64 | pbcopy
-```
-Create a secret named PING_IDENTITY_DEVOPS_USER_BASE64 with the value. 
+Once you
 
 ## Prepare Profiles
 
@@ -199,7 +118,11 @@ To test this environment quickly use the [baseline server-profile](https://githu
 
 ## Adjust Default Deployment
 
+> Note: The defaults are aligned to Ping's Employee K8s Clusters, if you are using one of them there no need to adjust yet. 
+
+
 The default deployment will deploy a number of software products with simple configurations and [ingresses](https://kubernetes.io/docs/concepts/services-networking/ingress/). Ingresses rely on the kubernetes cluster having an [ingress controller](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/) deployed. 
+
 
 ### Ingress
 
@@ -220,11 +143,14 @@ pingdataconsole:
 ```
 
 
-
+## 
 **Create a branch** off the default branch. This deploys an up-to-date, isolated environment to build a new feature. 
 
 **Follow ingress URLs** - once the environment has deployed. Features are developed through admin UIs, command line utilities, or api calls. Ingress URLs can be found with: 
+
+```
 kubectl get ingress -n <namespace>
+```
 
 **Thoroughly test** your new feature in your local environment. 
 
