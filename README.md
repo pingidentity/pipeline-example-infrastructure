@@ -1,25 +1,24 @@
 Reference CI/CD Template
 ===
 
-> DISCLAIMER: This is a template repository implementation of a **sample** CI/CD pipeline. This repository should not be considered production worthy, it should be used to demo and learn how to use Ping Identity Containerized Software in a GitOps Model.
+> DISCLAIMER: This is a template repository implementation of a **sample** CI/CD pipeline. This repository should not be considered production worthy, it is intended for use as a demonstration only. It will provide the opportunitye to learn how to use Ping Identity Containerized Software in a GitOps Model.
 
-Welcome, Developer! 
+Welcome, Developer!
 
-This document is formatted as such:
+The demonstration flow is as follows:
 
-- Start by launching an environment
-- Understand what is running
-- Complete a simple feature flow
-- Consider what customization is available
-
-
+- Launch an integrated Ping Software stack into a Kubernetes cluster
+- Explore what is running to understand how things are deployed and configured
+- Complete a simple feature flow where you can make a change and see the resulting activity
+- Next steps, including customization options available from this demo.
 
 **Table of Contents**
 - [Reference CI/CD Template](#reference-cicd-template)
   - [General Information](#general-information)
   - [Prerequisites](#prerequisites)
+    - [Recommended](#recommended)
   - [Launch an Environment](#launch-an-environment)
-  - [Explanation](#explanation)
+  - [Description of the default environment deployment](#description-of-the-default-environment-deployment)
   - [Cleanup](#cleanup)
   - [Prepare Profiles](#prepare-profiles)
     - [Use Ping Identity's Baseline Server Profiles](#use-ping-identitys-baseline-server-profiles)
@@ -32,17 +31,17 @@ This document is formatted as such:
 
 ## General Information
 
-**Development Model** - Interaction follows a development model similar to [Github Flow](https://docs.github.com/en/get-started/quickstart/github-flow) or trunk-based. 
+**Development Model** - Interaction follows a development model similar to [Github Flow](https://docs.github.com/en/get-started/quickstart/github-flow) or trunk-based.
 
-**Deployment architecture** - A Single Region implementation based on guidelines in [devops.pingidentity.com](devops.pingidentity.com).
+**Deployment architecture** - A Single Region implementation based on guidelines from [devops.pingidentity.com](devops.pingidentity.com).
 
 **Default Branch** - prod
 
 **Variables**
 
-Files in `helm` and `manifest` have the .subst prefix. This allows the files to hold shell variables `${FOO}`. These variables will be computed to hardcoded values before deploying. Any variable on a .subst file should have a default set in `scripts/lib.sh`
+Files in the `helm` and `manifest` directories have the .subst suffix. This naming convention supports the files housing shell variables `${FOO}`. These variables will be computed to hardcoded values before deploying. Any variable in a .subst file should have a default value set in `scripts/lib.sh`
 
-**Reading Comments** - Comments are structured like Markdown headers. Multi-line comments are indented. For Readability, comments are not repeated with repeated code. On YAML, comment indentation matches relevant code
+**Reading Comments** - Comments are structured as Markdown headers. Multi-line comments are indented. For readability, comments are not repeated with repeated code. In the YAML files, comment indentation matches relevant code:
 
 ```shell
 # Top Level Comment
@@ -50,47 +49,45 @@ Files in `helm` and `manifest` have the .subst prefix. This allows the files to 
 ##   ... rest of Sub-Comment
 ### Sub-Sub-Comment
 ```
-
 **Gitignore**
-non .subst file counterparts are tracked in .gitignore to prevent accidental commits from local testing
+Non .subst file counterparts are tracked in .gitignore to prevent accidental commits from local testing being published.
 
 ## Prerequisites
 
-Required:
-
-- Set up template repo
-  - click "Use This Template" to add it as a repository on your account.
-  - git clone the new repo to `~/projects/devops/pingidentity-devops-reference-pipeline`
-  > IMPORTANT: The folder name and is hardcoded in following commands.
-- Publicly Accessible Kubernetes Cluster - the cluster must be _publicly accessible_ to use free [Github Actions Hosted Runners](https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#about-github-hosted-runners). If you cannot use a publicly accessible cluster, look into [Self-hosted Runners](https://docs.github.com/en/actions/hosting-your-own-runners/about-self-hosted-runners)
+- Github account
+- Publicly Accessible Kubernetes Cluster - the cluster must be _publicly accessible_ to use free [Github Actions Hosted Runners](https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#about-github-hosted-runners). If you cannot use a publicly accessible cluster, see [Self-hosted Runners](https://docs.github.com/en/actions/hosting-your-own-runners/about-self-hosted-runners)
 - pingctl configured or PING_IDENTITY_DEVOPS_USER/KEY exported in environment
 - [kubectl](https://kubernetes.io/docs/tasks/tools/)
 - [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
 - Understanding of [Helm](https://helm.sh/docs/intro/quickstart/) and consuming Helm Charts
+### Recommended
+- [k9s](https://k9scli.io/)
 
 ## Launch an Environment
+Set up a repository from this template:
+- click **Use This Template** to create a new repository in your account.
+- Using git, clone the new repository to `~/projects/devops/pingidentity-devops-reference-pipeline`
+ > IMPORTANT: The folder name must match. It is hardcoded in the scripts supporting the following commands.
 
-Start by getting a simple environment running. 
-
-The following script will prepare your local and remote repo. For a quick demo, accept the defaults. 
+Start by getting a simple environment running. The following script will prepare your local and remote repository. For now, accept the defaults - later in this guide modifications from default will be discussed.
 
 ```
 ./scripts/initialize.sh
 ```
 
-To deploy an environment, create and push new branch via cli (or  GitHub Web):
+To deploy an environment, create and push a new branch via cli (or GitHub Web):
 
 ```
 git checkout -b mydemo
 git push origin mydemo
 ```
 
-Watch the deployment in GitHub Actions Logs and your k8s namespace.
+As the code is deployed, you can observe the pipeline actions in GitHub Actions Logs and the pods and other objects being created in your Kubernetes namespace.  The **k9s** utility referenced above is ideal for watching activity in real-time in a cluster.
 
 
-## Explanation
+## Description of the default environment deployment
 
-The initialize script took steps to prepare your local and remote repositories:
+The *initialize.sh* script prepared your local and remote repositories for use:
 1. Prep Baseline:
    1. git clone Ping Identity Server Profiles baseline folder
    2. copy to a `profiles` folder
