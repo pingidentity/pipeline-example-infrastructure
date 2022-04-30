@@ -59,7 +59,7 @@ envsubstFiles() {
           _templateDir="$(dirname ${template})"
           _templateBase="$(basename ${template})"
           envsubst "'$(getEnvKeys)'" < "${template}" > "${_templateDir}/${_templateBase}.final"
-          echo "${_templateDir}/${_templateBase%.subst}" >> expandedFiles
+          echo "${_templateDir}/${_templateBase}.final" >> expandedFiles
       done < tmpFileList
       rm tmpFileList
       shift
