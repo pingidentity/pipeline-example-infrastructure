@@ -116,6 +116,8 @@ EOF
 base64 "${CWD}/@kubeconfig" | tr -d \\n > "${CWD}/@kubeconfigb64"
 gh secret set KUBECONFIG_YAML < "${CWD}/@kubeconfigb64"
 rm "${CWD}/@kubeconfigb64"
+
+echo "${YELLOW}To run scripts locally, run:  export KUBECONFIG=${CWD}/@kubeconfig${NC}"
 }
 
 _setDevopsSecret(){
