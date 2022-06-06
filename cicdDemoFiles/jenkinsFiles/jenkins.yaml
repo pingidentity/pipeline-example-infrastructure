@@ -1,0 +1,111 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: jenkins
+  namespace: cicd
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jenkins
+  serviceName: jenkins
+  template:
+    metadata:
+      labels:
+        app: jenkins
+    spec:
+      serviceAccount: jenkins-kubectl-sa
+      securityContext:
+        fsGroup: 1000
+        runAsUser: 1000
+      containers:
+      - name: jenkins
+        image: jenkins:plugins
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          privileged: true
+        ports:
+          - name: http-port
+            containerPort: 8080
+        volumeMounts:
+          - name: jenkins-data
+            mountPath: /var/jenkins_home
+          - name: docker-sock
+            mountPath: /var/run/docker.sock
+      volumes:
+        - name: docker-sock
+          hostPath:
+            path: /var/run/docker.sock
+  volumeClaimTemplates:
+    - metadata:
+        name: jenkins-data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        storageClassName: hostpath
+        resources:
+          requests:
+            storage: 5Gi
+---
+ 
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: jenkins-pvc
+  namespace: cicd
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: hostpath
+  resources:
+    requests:
+      storage: 5Gi
+ 
+---
+ 
+apiVersion: v1
+kind: Service
+metadata:
+  name: jenkins
+  namespace: cicd
+spec:
+  type: NodePort
+  ports:
+    - port: 8080
+      targetPort: 8080
+      nodePort: 32221
+  selector:
+    app: jenkins
+ 
+---
+ 
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: jenkins-kubectl-sa
+ 
+---
+ 
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: cicd
+  name: jenkins-kubectl-role
+rules:
+- apiGroups: ["", "apps"] # "" indicates the core API group
+  resources: ["*"]
+  verbs: ["*"]
+ 
+---
+ 
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: jenkins-kubectl-rb
+  namespace: cicd
+subjects:
+  - kind: ServiceAccount
+    name: jenkins-kubectl-sa
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: jenkins-kubectl-role

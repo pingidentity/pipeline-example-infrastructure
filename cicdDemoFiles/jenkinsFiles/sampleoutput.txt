@@ -1,0 +1,198 @@
+Started by user unknown or anonymous
+Obtained Jenkinsfile from git http://gitea-http:3000/superapp/superapp.git
+[Pipeline] Start of Pipeline
+[Pipeline] node
+Running on Jenkins in /var/jenkins_home/workspace/superapp
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Declarative: Checkout SCM)
+[Pipeline] checkout
+The recommended git tool is: NONE
+using credential superappRepo
+Cloning the remote Git repository
+Cloning repository http://gitea-http:3000/superapp/superapp.git
+ > git init /var/jenkins_home/workspace/superapp # timeout=10
+Fetching upstream changes from http://gitea-http:3000/superapp/superapp.git
+ > git --version # timeout=10
+ > git --version # 'git version 2.34.2'
+using GIT_ASKPASS to set credentials access Gitea
+ > git fetch --tags --force --progress -- http://gitea-http:3000/superapp/superapp.git +refs/heads/*:refs/remotes/origin/* # timeout=10
+ > git config remote.origin.url http://gitea-http:3000/superapp/superapp.git # timeout=10
+ > git config --add remote.origin.fetch +refs/heads/*:refs/remotes/origin/* # timeout=10
+Avoid second fetch
+ > git rev-parse refs/remotes/origin/master^{commit} # timeout=10
+Checking out Revision 518a7a4d6962c082c0612e8270c75946d19996c2 (refs/remotes/origin/master)
+ > git config core.sparsecheckout # timeout=10
+ > git checkout -f 518a7a4d6962c082c0612e8270c75946d19996c2 # timeout=10
+Commit message: "first commit"
+First time build. Skipping changelog.
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Pipeline Started)
+[Pipeline] echo
+Received webhook from Git
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Simulated Testing)
+[Pipeline] echo
+############## confirming environment ##############
+[Pipeline] sh
++ kubectl get pods
+NAME                              READY   STATUS    RESTARTS   AGE
+gitea-0                           1/1     Running   0          26m
+gitea-memcached-9f7986c9c-gcq8c   1/1     Running   0          26m
+gitea-postgresql-0                1/1     Running   0          26m
+jenkins-85d6779c78-p9vmw          1/1     Running   0          11m
+[Pipeline] sh
++ docker info
+Client:
+ Context:    default
+ Debug Mode: false
+
+Server:
+ Containers: 47
+  Running: 42
+  Paused: 0
+  Stopped: 5
+ Images: 16
+ Server Version: 20.10.13
+ Storage Driver: overlay2
+  Backing Filesystem: extfs
+  Supports d_type: true
+  Native Overlay Diff: true
+  userxattr: false
+ Logging Driver: json-file
+ Cgroup Driver: cgroupfs
+ Cgroup Version: 2
+ Plugins:
+  Volume: local
+  Network: bridge host ipvlan macvlan null overlay
+  Log: awslogs fluentd gcplogs gelf journald json-file local logentries splunk syslog
+ Swarm: inactive
+ Runtimes: io.containerd.runc.v2 io.containerd.runtime.v1.linux runc
+ Default Runtime: runc
+ Init Binary: docker-init
+ containerd version: 2a1d4dbdb2a1030dc5b01e96fb110a9d9f150ecc
+ runc version: v1.0.3-0-gf46b6ba
+ init version: de40ad0
+ Security Options:
+  seccomp
+   Profile: default
+  cgroupns
+ Kernel Version: 5.10.104-linuxkit
+ Operating System: Docker Desktop
+ OSType: linux
+ Architecture: x86_64
+ CPUs: 6
+ Total Memory: 9.73GiB
+ Name: docker-desktop
+ ID: TADB:DUDE:AIGB:OWFD:KZST:Z2AT:4RNA:2H2J:YOPE:5YUV:7PPE:FHLA
+ Docker Root Dir: /var/lib/docker
+ Debug Mode: false
+ HTTP Proxy: http.docker.internal:3128
+ HTTPS Proxy: http.docker.internal:3128
+ No Proxy: hubproxy.docker.internal
+ Registry: https://index.docker.io/v1/
+ Labels:
+ Experimental: false
+ Insecure Registries:
+  hubproxy.docker.internal:5000
+  127.0.0.0/8
+ Live Restore Enabled: false
+
+[Pipeline] echo
+############## Simulated testing (duration: 20 seconds) ##############
+[Pipeline] sleep
+Sleeping for 20 sec
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Docker Build)
+[Pipeline] echo
+############## building new Docker image ##############
+[Pipeline] sh
++ docker image build -t superapp .
+#1 [internal] load build definition from Dockerfile
+#1 sha256:a08b7aea6d5a8e6222704e50549ac8ebd0b415e810b51f28e765e73f2082f285
+#1 transferring dockerfile: 174B done
+#1 DONE 0.0s
+
+#2 [internal] load .dockerignore
+#2 sha256:793f7b02349df0c7e8bb65b9f1ec6fb9e7ab6b0b5179e0b7c2702a9d30a8fe0c
+#2 transferring context: 2B done
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/python:alpine3.15
+#3 sha256:1a1c2ca4cff4df973cfa70a88707f26522f33b7263b7885ab6577341e9cfc384
+#3 DONE 0.0s
+
+#5 [internal] load build context
+#5 sha256:a776c7a28883b0583b3a9a77003cbdc16c7fe165225a410a9db736244a8a8bee
+#5 DONE 0.0s
+
+#4 [1/3] FROM docker.io/library/python:alpine3.15
+#4 sha256:d62a458217f5a9faa5957c9a7360f7cae55cde15b2f3f6d5707718f3184287d6
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 sha256:a776c7a28883b0583b3a9a77003cbdc16c7fe165225a410a9db736244a8a8bee
+#5 transferring context: 204B done
+#5 DONE 0.0s
+
+#6 [2/3] COPY index.html /var/html/
+#6 sha256:a329402287a2e9026cc866de631a81b71f9a2353a1c87a3fcefb0dbb828aebc6
+#6 CACHED
+
+#7 [3/3] WORKDIR /var/html
+#7 sha256:5f99af9713e2db2731cb31cf314ba22084728e99c7f0a3ff1a2eda4604e91cb0
+#7 CACHED
+
+#8 exporting to image
+#8 sha256:e8c613e07b0b7ff33893b694f7759a10d42e180f2b4dc349fb57dc6b71dcab00
+#8 exporting layers done
+#8 writing image sha256:d4b452e5cdc5045d97a621d8debd6a49e062a98345a04b9eea7bb28ccdc7bd0e done
+#8 naming to docker.io/library/superapp done
+#8 DONE 0.0s
+[Pipeline] sh
++ docker image tag superapp:latest superapp:1.1
+[Pipeline] sleep
+Sleeping for 5 sec
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Update Deployment)
+[Pipeline] echo
+############## Confirming new image is on the local host ##############
+[Pipeline] sh
++ docker image+  lsgrep
+ superapp
+superapp                                                  1.1                                                     d4b452e5cdc5   5 hours ago      47.8MB
+superapp                                                  latest                                                  d4b452e5cdc5   5 hours ago      47.8MB
+[Pipeline] echo
+############## Deploying new version of SuperApp ##############
+[Pipeline] sh
++ sed -i s/REPLACEMEBUILDNUMBER/1/g superapp.yaml
+[Pipeline] sh
++ kubectl apply -f superapp.yaml
+service/superapp-nodeport created
+deployment.apps/superapp created
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Declarative: Post Actions)
+[Pipeline] cleanWs
+[WS-CLEANUP] Deleting project workspace...
+[WS-CLEANUP] Deferred wipeout is used...
+[WS-CLEANUP] done
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // node
+[Pipeline] End of Pipeline
+Finished: SUCCESS

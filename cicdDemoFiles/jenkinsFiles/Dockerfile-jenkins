@@ -1,0 +1,34 @@
+FROM jenkins/jenkins:2.345-alpine
+ 
+# Skip initial setup screens after launch
+ENV JAVA_OPTS -Djenkins.install.runSetupWizard=false
+ 
+# Preload plugins into the image
+COPY plugins.txt /usr/share/jenkins/plugins.txt
+RUN jenkins-plugin-cli --plugin-file /usr/share/jenkins/plugins.txt
+ 
+USER root
+# Install Docker and supporting components
+RUN apk add docker py-pip sudo shadow
+RUN gpasswd -a jenkins docker && gpasswd -a jenkins root
+ 
+# Enable the Jenkins user to run sudo without a password
+RUN echo "jenkins ALL=NOPASSWD: ALL" >> /etc/sudoers  
+ 
+# We have to be able to use sudo to access the Docker socket
+# However, we want to issue calls as normal (using the docker command), so the sudo script is named 'docker'
+  
+# Rename the docker binary
+RUN mv /usr/bin/docker /usr/bin/docker1
+ 
+# Add the sudo script, naming it docker and set permissions
+COPY docker-sudo /usr/bin/docker
+RUN chmod 755 /usr/bin/docker
+ 
+# Install kubectl
+RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" \
+        && mv kubectl /usr/local/bin \
+        && chmod +x /usr/local/bin/kubectl
+ 
+# Run the container as the Jenkins user
+USER jenkins

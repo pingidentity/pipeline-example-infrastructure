@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: superapp-nodeport
+  namespace: cicd
+spec:
+  type: NodePort
+  ports:
+  - port: 8080
+    targetPort: 8080
+    nodePort: 32222
+  selector:
+    app: superapp
+ 
+---
+ 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: superapp
+  namespace: cicd
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: superapp
+  template:
+    metadata:
+      labels:
+        app: superapp
+    spec:
+      containers:
+      - name: superapp-app-container
+        image: superapp:1.REPLACEMEBUILDNUMBER
+        ports:
+        - containerPort: 8080

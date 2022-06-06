@@ -1,0 +1,41 @@
+pipeline {
+  agent any
+  stages {
+    stage('Pipeline Started') {
+      steps {
+        echo "Received webhook from Git"
+      }
+    }
+    stage('Simulated Testing') {
+     steps {
+       echo "############## confirming environment ##############"
+       sh "kubectl get pods"
+       sh "docker info"
+       echo "############## Simulated testing (duration: 20 seconds) ##############"
+       sleep 20
+       }
+     }
+    stage('Docker Build') {
+      steps {
+        echo "############## building new Docker image ##############"
+        sh "docker image build -t superapp ."
+        sh "docker image tag superapp:latest superapp:1.${BUILD_NUMBER}"
+        sleep 5
+        }
+      }
+    stage('Update Deployment') {
+      steps {         
+        echo "############## Confirming new image is on the local host ##############"
+        sh "docker image ls | grep superapp"
+        echo "############## Deploying new version of SuperApp ##############"
+        sh "sed -i 's/REPLACEMEBUILDNUMBER/${BUILD_NUMBER}/g' superapp.yaml"
+        sh "kubectl apply -f superapp.yaml"
+        }
+      }     
+    }
+    post {
+      always {
+         cleanWs()
+      }
+   }
+}
