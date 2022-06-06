@@ -1,0 +1,11 @@
+@*
+# *.final
+*.DS_Store
+*.final
+local-secrets.sh
+tmp
+expandedFiles
+k8stmp
+# splunk-config-init.yaml
+# values.yaml
+# tmp*
