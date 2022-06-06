@@ -1,0 +1,64 @@
+on:
+  push:
+
+name: Deploy Environment
+
+jobs:
+  deploy:
+    name: Deploy
+    # uses hosted runner
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.commits[0].message, '[skip ci]')"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Install Dependencies
+        run: |
+          ## Install and configure kubectl
+          curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x ./kubectl
+          sudo mv ./kubectl /usr/local/bin/kubectl
+          mkdir ${HOME}/.kube
+          echo "${{ secrets.KUBECONFIG_YAML }}" | base64 --decode > ${HOME}/.kube/config
+          kubectl version
+          ## Install and configure helm
+          curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
+          chmod 700 get_helm.sh
+          ./get_helm.sh
+          helm repo add pingidentity https://helm.pingidentity.com/
+          helm plugin install https://github.com/databus23/helm-diff 
+          sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys CC86BB64
+          sudo add-apt-repository ppa:rmescandon/yq
+          sudo apt update
+          sudo apt install yq -y
+      - name: Deploy
+        run: |
+          # Deploy
+          sh scripts/deploy.sh
+        env:
+          PING_IDENTITY_DEVOPS_USER_BASE64: ${{ secrets.PING_IDENTITY_DEVOPS_USER_BASE64 }}
+          PING_IDENTITY_DEVOPS_KEY_BASE64: ${{ secrets.PING_IDENTITY_DEVOPS_KEY_BASE64 }}
+      - name: Report Success
+        env:
+          SLACK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          if test ${{ secrets.SLACK_WEBHOOK_URL }} != ""; then
+            . "scripts/lib.sh"
+            echo "Your environment is ready, check Slack!"
+            tmpHosts="$(kubectl get ing -l app.kubernetes.io/instance="${REF}" '-o=jsonpath={.items[*].spec.rules[*].host}')"
+            for i in $tmpHosts ; do INGRESS_HOSTS="$INGRESS_HOSTS $i \\n"; done
+            curl -X POST -H 'Content-type: application/json' --data '{"text":"Deployment Successful - :rocket: Check out hosts:\n'"$INGRESS_HOSTS"'"}' "${SLACK_URL}"
+          fi
+      - name: Report Failure
+        env:
+          SLACK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        if: ${{ failure() }}
+        run: |
+          if test ${{ secrets.SLACK_WEBHOOK_URL }} != ""; then
+            echo "Deployment Failed."
+            curl -X POST -H 'Content-type: application/json' --data '{"text":"Failed Deployment - :sob: Check pipeline - '"${GITHUB_SERVER_URL}"'/'"${GITHUB_REPOSITORY}"'/actions/runs/'"$GITHUB_RUN_ID"'"}' "${SLACK_URL}"
+          fi

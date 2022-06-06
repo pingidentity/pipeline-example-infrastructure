@@ -1,0 +1,43 @@
+on:
+  delete:
+    branches-ignore:
+      - qa
+      - main
+      - master
+
+name: DeleteEnv
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - name: Install Dependencies
+      run: |
+        ## Install and configure kubectl
+        curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl"
+        chmod +x ./kubectl
+        sudo mv ./kubectl /usr/local/bin/kubectl
+        mkdir ${HOME}/.kube
+        echo "${{ secrets.KUBECONFIG_YAML }}" | base64 --decode > ${HOME}/.kube/config
+        kubectl version
+        ## Install and configure helm
+        curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
+        chmod 700 get_helm.sh
+        ./get_helm.sh
+        helm repo add pingidentity https://helm.pingidentity.com/
+        helm plugin install https://github.com/databus23/helm-diff 
+        sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys CC86BB64
+        sudo add-apt-repository ppa:rmescandon/yq
+        sudo apt update
+        sudo apt install yq -y
+
+    - name: Cleanup Feature K8S Env
+      run: |
+        export REF=$(echo "${{ github.event.ref }}" | sed -e "s#refs/heads/##g")
+        sh scripts/prune.sh --heavy
