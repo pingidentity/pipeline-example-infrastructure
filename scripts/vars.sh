@@ -11,5 +11,4 @@ export CHART_VERSION="0.9.0"
 ## Useful for multiple pipelines in same clusters
 ##  Prefixes ENV variable. ENV variable is used for helm release name.
 ##  If used, include trailing slash. (e.g. ENV_PREFIX="myenv-")
-export ENV_PREFIX="samir-"
-export NS_PER_ENV="true"
+export ENV_PREFIX=""
