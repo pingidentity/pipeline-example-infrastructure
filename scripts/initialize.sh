@@ -91,6 +91,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: ping-devops-admin
+  namespace: ${_k8sNamespace}
 EOF
 else
   echo "Using one namespace for all environments.."
