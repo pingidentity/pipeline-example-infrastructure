@@ -51,6 +51,7 @@ read -p "y/n - Default (n):"
 if test "${REPLY}" = "y" ; then
   _k8sNamespace='default'
   echo "Creating ping-devops-admin serviceaccount in ${_k8sNamespace}"
+  echo "" >> "${CWD}/vars.sh"
   echo 'export NS_PER_ENV="true"' >> "${CWD}/vars.sh"
   git add "${CWD}/vars.sh" >/dev/null 2>&1
   git commit -m "1:1 K8sNamespace:Environment" >/dev/null 2>&1
