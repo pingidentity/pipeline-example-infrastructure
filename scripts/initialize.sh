@@ -86,7 +86,7 @@ kind: ClusterRoleBinding
 metadata:
   name: ping-devops-cluster-admin
 roleRef:
-  kind: Role
+  kind: ClusterRole
   name: ping-devops-cluster-admin
   apiGroup: rbac.authorization.k8s.io
 subjects:
@@ -131,7 +131,7 @@ kind: RoleBinding
 metadata:
   name: namespace-admin
 roleRef:
-  kind: ClusterRole
+  kind: Role
   name: namespace-admin
   apiGroup: rbac.authorization.k8s.io
 subjects:
