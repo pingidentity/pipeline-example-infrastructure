@@ -46,7 +46,8 @@ test $_missingTool = "true" && exit_usage "Missing tool(s)"
 _generateKubeconfig() {
 
 _currentNamespace=$(kubectl config view --minify -o jsonpath='{..namespace}')
-read -p "Use separate K8s namespace per environment? (**Requires cluster admin access**)\n y/n Default: n"
+echo "Use separate K8s namespace per environment? (**Requires cluster admin access**)"
+read -p "y/n - Default (n):"
 if test "${REPLY}" = "y" ; then
   _k8sNamespace='default'
   echo "Creating ping-devops-admin serviceaccount in ${_k8sNamespace}"
@@ -93,7 +94,8 @@ subjects:
   name: ping-devops-admin
 EOF
 else
-  read -p "Using one namespace for all environments..\nWhich Kubernetes namespace to use? (Enter for ${_currentNamespace})"
+  echo "Using one namespace for all environments.."
+  read -p "Which Kubernetes namespace to use? (Enter for ${_currentNamespace})"
   _k8sNamespace="${REPLY:-${_currentNamespace}}"
   echo "Using Namespace: ${_k8sNamespace}"
   echo "Generating Kubeconfig: ${_k8sNamespace}.."
@@ -129,7 +131,7 @@ kind: RoleBinding
 metadata:
   name: namespace-admin
 roleRef:
-  kind: Role
+  kind: ClusterRole
   name: namespace-admin
   apiGroup: rbac.authorization.k8s.io
 subjects:
