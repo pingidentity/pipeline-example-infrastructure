@@ -68,7 +68,6 @@ items:
   kind: ClusterRole
   metadata:
     name: ping-devops-cluster-admin
-    namespace: ${_k8sNamespace}
   rules:
   - apiGroups:
     - '*'
