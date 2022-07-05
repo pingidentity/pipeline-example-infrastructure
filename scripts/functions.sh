@@ -28,9 +28,9 @@ getEnv() {
   ### This pattern will match if the workflow trigger is a branch
   ENV="${ENV_PREFIX}$(echo "${GITHUB_REF}" | sed -e "s#refs/heads/##g")"
   fi
-  PROFILE_GIT_BRANCH="${ENV_PREFIX}$(echo "${GITHUB_REF}" | sed -e "s#refs/heads/##g")"
+  SERVER_PROFILE_BRANCH="$(echo "${GITHUB_REF}" | sed -e "s#refs/heads/##g")"
   echo "${YELLOW}INFO: Environment is: ${ENV}${NC}"
-  export ENV PROFILE_GIT_BRANCH
+  export ENV SERVER_PROFILE_BRANCH
 }
 
 getNamespace() {

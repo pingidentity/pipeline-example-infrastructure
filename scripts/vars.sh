@@ -9,7 +9,7 @@
 ##   For dev envs - concat of ENV_PREFIX and branch name
 ##   For prod - concat of 'prod' and branch name
 ##
-## PROFILE_GIT_BRANCH - git branch that pipeline corresponds to.
+## SERVER_PROFILE_BRANCH - git branch that pipeline corresponds to.
 ##    Good for SERVER_PROFILE_BRANCH variable in values.yaml
 # END SCRIPT VARS
 
