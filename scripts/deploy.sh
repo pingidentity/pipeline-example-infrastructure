@@ -88,7 +88,7 @@ echo "${GREEN}INFO: Running Helm upgrade${NC}"
 _deployUTC=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
 helm upgrade --install \
-  "${ENV}" pingidentity/ping-devops \
+  "${ENV}" "${HELM_CHART_NAME}" \
   -f "${VALUES_FILE}" ${_valuesDevFile}  \
   --version "${CHART_VERSION}" -n "${K8S_NAMESPACE}" $_dryRun
 
