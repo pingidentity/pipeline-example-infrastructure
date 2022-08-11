@@ -53,6 +53,9 @@ if test "${REPLY}" = "y" ; then
   echo "Creating ping-devops-admin serviceaccount in ${_k8sNamespace}"
   echo "" >> "${CWD}/vars.sh"
   echo 'export NS_PER_ENV="true"' >> "${CWD}/vars.sh"
+  echo "##  Prefixes release namespace. K8S_NAMESPACE variable is used for namespace for release
+##  If used, include trailing slash. (e.g. NS_PREFIX='myenv-')" >> "${CWD}/vars.sh"
+  echo 'export NS_PREFIX=""' >> "${CWD}/vars.sh"
   git add "${CWD}/vars.sh" >/dev/null 2>&1
   git commit -m "1:1 K8sNamespace:Environment" >/dev/null 2>&1
 
@@ -99,6 +102,7 @@ else
   read -p "Which Kubernetes namespace to use? (Enter for ${_currentNamespace})"
   _k8sNamespace="${REPLY:-${_currentNamespace}}"
   echo "Using Namespace: ${_k8sNamespace}"
+  echo "export K8S_NAMESPACE=${_k8sNamespace}" >> "${CWD}/vars.sh"
   echo "Generating Kubeconfig: ${_k8sNamespace}.."
 
 cat <<EOF | kubectl apply -f -
@@ -228,4 +232,6 @@ _setDevopsSecret
 _generateKubeconfig
 
 git push origin
+echo "## END OF AUTOMATED VARS ##" >> "${CWD}/vars.sh"
+echo "" >> "${CWD}/vars.sh"
 echo "${GREEN} Initialization completed successfully.${NC}"

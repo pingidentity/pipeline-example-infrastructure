@@ -39,7 +39,6 @@ done
 . "${CWD}/functions.sh"
 getLocalSecrets
 getEnv
-getNamespace
 
 # Validate Pre-reqs
 _missingTool="false"
