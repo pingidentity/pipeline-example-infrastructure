@@ -9,7 +9,6 @@ CWD=$(dirname "$0")
 . "${CWD}/functions.sh"
 getLocalSecrets
 getEnv
-getNamespace
 
 helm uninstall "${ENV}" -n "${K8S_NAMESPACE}"
 if test "${1}" = "--heavy" ; then
