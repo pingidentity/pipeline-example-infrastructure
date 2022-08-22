@@ -76,9 +76,6 @@ while IFS= read -r k8sFile; do
 done < k8stmp
 test -z "${_dryRun}" && rm k8stmp
 
-## Identify possible values.yaml files
-VALUES_FILE=${VALUES_FILE:=helm/values.yaml.final}
-VALUES_DEV_FILE=${VALUES_DEV_FILE:=helm/values.dev.yaml.final}
 test "${ENV}" != "prod" && _valuesDevFile="-f ${VALUES_DEV_FILE}"
 
 ## Helm Deploy
@@ -86,10 +83,11 @@ echo "${GREEN}INFO: Running Helm upgrade${NC}"
 
 _deployUTC=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
+set -x
 helm upgrade --install \
   "${ENV}" "${HELM_CHART_NAME}" \
   -f "${VALUES_FILE}" ${_valuesDevFile}  \
-  --version "${CHART_VERSION}" -n "${K8S_NAMESPACE}" $_dryRun
+  --version "${CHART_VERSION}" -n "${K8S_NAMESPACE}" --post-renderer "${KUSTOMIZE_FILE}" $_dryRun
 
 ## For Statefulsets that failed previously, the crashing pod must be deleted to pick up new changes
 ##    this is per: https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#forced-rollback
@@ -119,7 +117,7 @@ if test -z $_dryRun ; then
   test ! -d tmp && mkdir tmp
   revCurrent=$(helm ls --filter "${ENV}" -o json -n "${K8S_NAMESPACE}"| jq -r '.[0].revision')
   revPrevious=$(( revCurrent - 1 ))
-  helm diff revision "${ENV}" $revPrevious $revCurrent -n "${K8S_NAMESPACE}" --no-color -C 0 > tmp/helmdiff.txt
+  helm diff revision "${ENV}" $revPrevious $revCurrent -n "${K8S_NAMESPACE}" --post-renderer ${KUSTOMIZE_FILE} --no-color -C 0 > tmp/helmdiff.txt
 
   ## Watch helm release for pods going to crashloop
   echo "${YELLOW}INFO: Watching Release, DO NOT STOP SCRIPT${NC}"

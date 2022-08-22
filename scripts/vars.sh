@@ -19,6 +19,10 @@ export DEFAULT_BRANCH=prod
 export HELM_CHART_NAME="pingidentity/ping-devops"
 export HELM_CHART_URL="https://helm.pingidentity.com/"
 export CHART_VERSION="0.9.0"
+export VALUES_FILE="helm/values.yaml.final"
+export VALUES_DEV_FILE="helm/values.dev.yaml.final"
+export KUSTOMIZE_DIR="kustomize"
+export KUSTOMIZE_FILE="${KUSTOMIZE_DIR}/kustomize"
 ## Useful for multiple pipelines in same clusters
 ##  Prefixes ENV variable. ENV variable is used for helm release name.
 ##  If used, include trailing slash. (e.g. ENV_PREFIX="myenv-")

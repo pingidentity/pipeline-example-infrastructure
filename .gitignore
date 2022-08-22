@@ -6,6 +6,7 @@ local-secrets.sh
 tmp
 expandedFiles
 k8stmp
+kustomize/all.yaml
 # splunk-config-init.yaml
 # values.yaml
 # tmp*
