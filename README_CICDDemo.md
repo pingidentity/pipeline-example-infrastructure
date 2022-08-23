@@ -355,11 +355,11 @@ Refresh the Gitea browser page to see the files in the repository:
 Now that the code is ready, Jenkins needs to be deployed and configured.
 
 ### Jenkins files
-Files used in this section:
-- **[Dockerfile-jenkins](cicdDemoFiles/jenkinsFiles/Dockerfile-jenkins)**: This file is used for creating a custom Jenkins Docker image with necessary addition tooling
-- **[docker-sudo](cicdDemoFiles/jenkinsFiles/docker-sudo)**: Used as a workaround for mounting the Docker socket in the Jenkins container for building the images
-- **[plugins.txt](cicdDemoFiles/jenkinsFiles/plugins.txt)**: A listing of the Jenkins plugins that will be pre-loaded into the Jenkins image
-- **[jenkins.yaml](cicdDemoFiles/jenkinsFiles/jenkins.yaml)**: The Kubernetes YAML specifications to grant permissions and create the storage, service and deployment for Jenkins
+Files used in this section (also under the **cicdDemoFiles** directory):
+- **[./jenkinsFiles/Dockerfile-jenkins](cicdDemoFiles/jenkinsFiles/Dockerfile-jenkins)**: This file is used for creating a custom Jenkins Docker image with necessary addition tooling
+- **[./jenkinsFiles/docker-sudo](cicdDemoFiles/jenkinsFiles/docker-sudo)**: Used as a workaround for mounting the Docker socket in the Jenkins container for building the images
+- **[./jenkinsFiles/plugins.txt](cicdDemoFiles/jenkinsFiles/plugins.txt)**: A listing of the Jenkins plugins that will be pre-loaded into the Jenkins image
+- **[./jenkinsFiles/jenkins.yaml](cicdDemoFiles/jenkinsFiles/jenkins.yaml)**: The Kubernetes YAML specifications to grant permissions and create the storage, service and deployment for Jenkins
 
 ### Jenkins image
 Create a custom Jenkins image from the base image. **Dockerfile-jenkins** pre-installs Jenkins plugins from the **plugins.txt** file and installs the **kubectl** application and Docker components necessary for building and deploying the application.  To run docker commands, the Jenkins container needs to access the Docker socket on the local host through a volume mount.  In order for the mount to be accessible to the jenkins user in the container, the docker executable is renamed and accessed with a **sudo** alias script:
