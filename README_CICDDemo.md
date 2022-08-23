@@ -201,11 +201,11 @@ Provide the repository name as **superapp**, and leave all other options as defa
 ![Gitea empty repository](./img/giteaEmptyRepository.png "Gitea empty repository")
 
 ### Repository files
-The Gitea repository will have 4 files.  They are linked here, found in the **cicdDemoFiles** directory in this repository:
-- **[index.html](cicdDemoFiles/cicdDemo/index.html)**: This file contains the 'application code' that will be modified
-- **[Dockerfile](cicdDemoFiles/cicdDemo/Dockerfile)**: Used for building the Docker image with the code baked in
-- **[superapp.yaml](cicdDemoFiles/cicdDemo/superapp.yaml)**: Kubernetes YAML file deploying/updating the application
-- **[Jenkinsfile](cicdDemoFiles/cicdDemo/Jenkinsfile)**: This file contains the pipeline script for automating the build/test/release process.  Jenkins will consume this file as the pipeline to be used when it clones the repository later.
+The Gitea repository will have 4 files.  They are linked here, found under the **cicdDemoFiles** directory in this repository:
+- **[./cicdDemo/index.html](cicdDemoFiles/cicdDemo/index.html)**: This file contains the 'application code' that will be modified
+- **[./cicdDemo/Dockerfile](cicdDemoFiles/cicdDemo/Dockerfile)**: Used for building the Docker image with the code baked in
+- **[./cicdDemo/superapp.yaml](cicdDemoFiles/cicdDemo/superapp.yaml)**: Kubernetes YAML file deploying/updating the application
+- **[./cicdDemo/Jenkinsfile](cicdDemoFiles/cicdDemo/Jenkinsfile)**: This file contains the pipeline script for automating the build/test/release process.  Jenkins will consume this file as the pipeline to be used when it clones the repository later.
 
 The **index.html** file (the code) is a simple HTML page:
 ```
