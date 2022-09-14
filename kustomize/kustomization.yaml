@@ -1,0 +1,11 @@
+resources:
+  - all.yaml
+  
+patches:
+- target:
+    kind: Deployment
+    labelSelector: "app.kubernetes.io/name=pingdataconsole"
+  patch: |-
+    - op: replace
+      path: /spec/template/spec/securityContext
+      value: {"fsGroup":0,"runAsUser":0,"runAsGroup":0}

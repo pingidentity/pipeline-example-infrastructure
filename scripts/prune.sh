@@ -4,13 +4,16 @@
 ## *****IT CAN BE VERY DESTRUCTIVE*****
 ## Be sure you're on the right git branch. 
 
-# shellcheck source=lib.sh
-. ./scripts/lib.sh
+CWD=$(dirname "$0")
+. "${CWD}/vars.sh"
+. "${CWD}/functions.sh"
+getLocalSecrets
+getEnv
 
-helm uninstall "${REF}"
+helm uninstall "${ENV}" -n "${K8S_NAMESPACE}" --post-renderer ${KUSTOMIZE_FILE}
 if test "${1}" = "--heavy" ; then
-  kubectl delete pvc --selector=app.kubernetes.io/instance="${REF}"
-  # kubectl delete ns "${K8S_NAMESPACE}"
+  kubectl delete pvc --selector=app.kubernetes.io/instance="${ENV}"
+  kubectl delete ns "${K8S_NAMESPACE}"
 fi
 
-echo "${GREEN} INFO: Environment pruned - ${REF} ${NC}"
+echo "${GREEN} INFO: Environment pruned - ${ENV} ${NC}"
