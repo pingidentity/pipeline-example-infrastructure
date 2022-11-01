@@ -101,7 +101,7 @@ You will need:
 - The [Helm](https://helm.sh/docs/intro/install/) application for deploying the Gitea application
 - The [kubectl](https://kubernetes.io/docs/tasks/tools/) utility for working with Kubernetes (installed by default with Docker Desktop)
 - Basic [Docker](https://www.docker.com/) experience
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) with Kubernetes enabled, or access to a Kubernetes cluster (**Docker Desktop 4.6.1** was used for this document)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) with Kubernetes enabled, or access to a Kubernetes cluster (**Docker Desktop 4.11.1** was used for this document)
   - Enable Kubernetes if you have not already done so.  Navigate to the preferences panel of the Docker desktop application:
   ![Docker Desktop preferences](./img/dockerDesktopPreferences.png "Docker Desktop preferences")
   - Select Kubernetes and select the checkbox Enable Kubernetes. Restart Docker to initialize Kubernetes as prompted:
@@ -174,6 +174,8 @@ Create a port-forward to access the Gitea UI. ClusterIP services are not availab
 Open a browser window and enter the URL: http://localhost:32220 to access the Gitea interface.
 
 >Some browsers will not load the page without encryption (i.e., https instead of http).  Firefox and Chrome generally let you proceed even without the TLS encryption. There is no traffic leaving your local system in this demo, so there is no security risk with unencrypted traffic.
+
+>**Note**: You can ignore the error about the `ROOT_URL`.
 
 ![Gitea landing page](./img/giteaHome.png "Gitea landing page")
 
@@ -338,12 +340,12 @@ total 32
 
 ### Initialize git then add, commit, and push the files into the repository 
 git init
-git config user.email superapp@democompany.com
+git config user.email "superapp@democompany.com"
 git config user.name "superapp"
 git add *
 git commit -m "first commit"
 git remote add origin http://localhost:32220/superapp/superapp.git
-git push -u origin master
+git push -u origin main
 ```
 
 Refresh the Gitea browser page to see the files in the repository:
@@ -364,7 +366,7 @@ Files used in this section (also under the **cicdDemoFiles** directory):
 ### Jenkins image
 Create a custom Jenkins image from the base image. **Dockerfile-jenkins** pre-installs Jenkins plugins from the **plugins.txt** file and installs the **kubectl** application and Docker components necessary for building and deploying the application.  To run docker commands, the Jenkins container needs to access the Docker socket on the local host through a volume mount.  In order for the mount to be accessible to the jenkins user in the container, the docker executable is renamed and accessed with a **sudo** alias script:
 ```
-FROM jenkins/jenkins:2.345-alpine
+FROM jenkins/jenkins:2.361.2-alpine
 
 # Skip initial setup screens after launch
 ENV JAVA_OPTS -Djenkins.install.runSetupWizard=false

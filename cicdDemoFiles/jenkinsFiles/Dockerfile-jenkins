@@ -1,4 +1,4 @@
-FROM jenkins/jenkins:2.345-alpine
+FROM jenkins/jenkins:2.361.2-alpine
  
 # Skip initial setup screens after launch
 ENV JAVA_OPTS -Djenkins.install.runSetupWizard=false
