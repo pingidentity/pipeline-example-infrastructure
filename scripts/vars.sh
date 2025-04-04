@@ -18,7 +18,7 @@
 export DEFAULT_BRANCH=prod
 export HELM_CHART_NAME="pingidentity/ping-devops"
 export HELM_CHART_URL="https://helm.pingidentity.com/"
-export CHART_VERSION="0.9.0"
+export CHART_VERSION="0.11.6"
 export VALUES_FILE="helm/values.yaml.final"
 export VALUES_DEV_FILE="helm/values.dev.yaml.final"
 export KUSTOMIZE_DIR="kustomize"

@@ -31,11 +31,7 @@ jobs:
         chmod 700 get_helm.sh
         ./get_helm.sh
         helm repo add pingidentity https://helm.pingidentity.com/
-        helm plugin install https://github.com/databus23/helm-diff 
-        sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys CC86BB64
-        sudo add-apt-repository ppa:rmescandon/yq
-        sudo apt update
-        sudo apt install yq -y
+        helm plugin install https://github.com/databus23/helm-diff
 
     - name: Cleanup Feature K8S Env
       run: |
