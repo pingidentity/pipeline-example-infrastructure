@@ -175,7 +175,7 @@ users:
 EOF
 
 ## create KUBECONFIG_YAML secret
-base64 "${CWD}/@kubeconfig" | tr -cd "[:print:]" > "${CWD}/@kubeconfigb64"
+base64 -i "${CWD}/@kubeconfig" | tr -cd "[:print:]" > "${CWD}/@kubeconfigb64"
 gh secret set KUBECONFIG_YAML < "${CWD}/@kubeconfigb64"
 rm "${CWD}/@kubeconfigb64"
 

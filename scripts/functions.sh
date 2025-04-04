@@ -23,8 +23,12 @@ set +x
 
 ## Determine environment based on trigger
 getEnv() {
+  if test -n "${REF}"; then
+    # REF is passed in from the pipeline
+    ENV="${ENV_PREFIX}${REF}"
+    test "${NS_PER_ENV}" = "true" && K8S_NAMESPACE="${NS_PREFIX}${REF}"
   ### This pattern will match if the workflow trigger is prod
-  if test "${GITHUB_REF}" != "${GITHUB_REF%%"${DEFAULT_BRANCH}"}" ; then
+  elif test "${GITHUB_REF}" != "${GITHUB_REF%%"${DEFAULT_BRANCH}"}" ; then
     ENV="${ENV_PREFIX}prod"
     test "${NS_PER_ENV}" = "true" && K8S_NAMESPACE="${NS_PREFIX}prod"
   else
