@@ -1,4 +1,5 @@
 #!/usr/bin/env sh
+# Copyright © 2026 Ping Identity Corporation
 CWD=$(dirname "$0")
 
 usage ()
