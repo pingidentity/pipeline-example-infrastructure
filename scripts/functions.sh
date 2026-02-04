@@ -1,4 +1,5 @@
 #!/usr/bin/env sh
+# Copyright © 2026 Ping Identity Corporation
 RED='\033[0;31m'
 YELLOW='\033[0;33m'
 GREEN='\033[0;32m'

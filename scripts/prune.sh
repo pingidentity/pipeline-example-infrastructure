@@ -1,4 +1,5 @@
 #!/usr/bin/env sh
+# Copyright © 2026 Ping Identity Corporation
 
 ## THIS IS TO CLEAN THE RELEASE RELATED TO YOUR CURRENT BRANCH IN GIT.
 ## *****IT CAN BE VERY DESTRUCTIVE*****

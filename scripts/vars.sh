@@ -1,4 +1,5 @@
 #!/usr/bin/env sh
+# Copyright © 2026 Ping Identity Corporation
 
 # Set all Global script variables
 #   Every variable in this env should be exported
